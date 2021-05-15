@@ -26,11 +26,11 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
 
                 var authResult = await context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
                 var isAuthenticated = authResult.Succeeded && authResult.Principal.Identity.IsAuthenticated;
-                object userId = isAuthenticated ? authResult.Principal.Claims.SingleOrDefault(c => c.Type == "UserId")?.Value : Guid.NewGuid();
+                object userId = isAuthenticated ? authResult.Principal.GetUserId() : Guid.NewGuid();
                 string userName = isAuthenticated ? authResult.Principal.GetUserName() : string.Empty;
                 ConnectionAborted abortStatus = ConnectionAborted.None;
 
-                if(isAuthenticated)
+                if(!isAuthenticated)
                     abortStatus = ConnectionAborted.TokenExpiredOrInvalid;
                 else if (userId.ToString().IsNullOrEmpty())
                     abortStatus = ConnectionAborted.UserIdNotFound;

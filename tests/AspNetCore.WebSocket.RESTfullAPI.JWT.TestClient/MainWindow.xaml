@@ -14,8 +14,8 @@
         <Button Uid="connectButton" x:Name="connectButton" Click="connectButton_Click">Connect</Button>
         <Button Uid="deconnectButton" x:Name="deconnectButton" IsEnabled="False" Click="deconnectButton_Click">Deconnect</Button>
         <StackPanel Orientation="Horizontal">
-            <TextBlock MinWidth="150px">User id to send message (Guid):</TextBlock>
-            <TextBox Uid="UserId" x:Name="UserId" MinWidth="150px"></TextBox>
+            <TextBlock MinWidth="150px">User id to send message (Integer):</TextBlock>
+            <TextBox Uid="UserId" x:Name="UserId" MinWidth="50px"></TextBox>
             <TextBlock MinWidth="150px">Message to send:</TextBlock>
             <TextBox Uid="Message" x:Name="Message" MinWidth="250px"></TextBox>
         </StackPanel >

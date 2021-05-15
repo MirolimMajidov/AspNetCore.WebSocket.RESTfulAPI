@@ -49,6 +49,16 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
             return user.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
         }
 
+        /// <summary>
+        /// This is for get user name from User of Context
+        /// </summary>
+        /// <param name="user">User of Context</param>
+        /// <returns>User NAme</returns>
+        public static string GetUserId(this ClaimsPrincipal user, string claimName = "UserId")
+        {
+            return user.Claims.SingleOrDefault(c => c.Type == claimName)?.Value;
+        }
+
         public static bool IsNullOrEmpty(this string str)
         {
             return string.IsNullOrEmpty(str);

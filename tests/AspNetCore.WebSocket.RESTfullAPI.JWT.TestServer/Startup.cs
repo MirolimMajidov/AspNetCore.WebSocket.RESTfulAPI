@@ -1,4 +1,5 @@
 using AspNetCore.WebSocket.RESTfullAPI.Configurations;
+using AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Configurations;
 using AspNetCore.WebSocket.RESTfullAPI.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,6 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer
 {
@@ -21,8 +24,8 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentications();
             services.AddWebSocketManager();
-            services.AddControllers();
 
             #region API Documents
 
@@ -48,6 +51,17 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer
             });
 
             #endregion
+            
+            services.AddControllers()
+                 .AddNewtonsoftJson(options =>
+                  {
+                      options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                      options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Include;
+                      options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                  }
+             )
+            .AddXmlSerializerFormatters()
+            .AddXmlDataContractSerializerFormatters();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -72,7 +86,6 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer
             }
 
             app.UseRouting();
-
             app.UseAuthorization();
             app.WebSocketRESTfullJWT("/WSMessenger", receiveBufferSize: 5, keepAliveInterval: 30);
 

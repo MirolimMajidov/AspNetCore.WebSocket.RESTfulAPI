@@ -42,8 +42,15 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestClient
             {
                 if (!string.IsNullOrEmpty(UserName.Text))
                 {
-                    ws.Options.SetRequestHeader("UserName", UserName.Text);
-                    ws.Options.SetRequestHeader("UserId", Guid.NewGuid().ToString());
+                    var userId = new Random().Next(5, 100);
+                    var pairs = new List<KeyValuePair<string, string>>
+                    {
+                         new KeyValuePair<string, string>("UserName", UserName.Text),
+                         new KeyValuePair<string, string>("UserId", userId.ToString()),
+                    };
+                    //var token = GetContext.PostRequest("http://localhost:5000/api/Account/Authorization", pairs).Result;
+                    var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkJlbm9tIiwiVXNlcklkIjoiNDciLCJuYmYiOjE2MjExMDYzNTYsImV4cCI6MTYyMTE5Mjc1NiwiaWF0IjoxNjIxMTA2MzU2LCJpc3MiOiJXU1NlcnZlciIsImF1ZCI6IjlERDI4QUE3LTk2QjYtNDZBMy05RTQ0LUU3QTFDQjg0MzUwRCJ9.evZZdQwDXyCgKDwvWhLms-0JXpLD1gyqey_BnpX_Qk0";
+                    ws.Options.SetRequestHeader("Authorization", "Bearer " + token);
                     if (ws.State != WebSocketState.Open)
                     {
                         ws.ConnectAsync(new Uri($"ws://localhost:5000/WSMessenger"), CancellationToken.None).GetAwaiter().GetResult();
