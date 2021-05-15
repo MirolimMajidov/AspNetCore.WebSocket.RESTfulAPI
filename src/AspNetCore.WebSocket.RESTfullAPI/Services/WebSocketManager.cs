@@ -1,5 +1,4 @@
 ﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
-using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net.WebSockets;
@@ -10,7 +9,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
 {
     public class WebSocketManager : Disposable
     {
-        private readonly ConcurrentDictionary<Guid, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> sockets = new();
+        private readonly ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> sockets = new();
 
         public static bool LoggAllWSRequest { get; set; }
         public static int WebSocketBufferSize { get; set; }
@@ -21,7 +20,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// </summary>
         /// <param name="socketId">Socket's Id</param>
         /// <returns>Socket</returns>
-        public System.Net.WebSockets.WebSocket GetWebSocket(Guid socketId)
+        public System.Net.WebSockets.WebSocket GetWebSocket(object socketId)
         {
             return sockets.FirstOrDefault(p => p.Key == socketId).Value.WS;
         }
@@ -40,7 +39,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// Gets all active user WebSockets list
         /// </summary>
         /// <returns>Lsit of WebSockets</returns>
-        public ConcurrentDictionary<Guid, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> Clients()
+        public ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> Clients()
         {
             return sockets;
         }
@@ -50,7 +49,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// </summary>
         /// <param name="id">Socket to find Id</param>
         /// <returns>Socket Id</returns>
-        public Guid GetId(System.Net.WebSockets.WebSocket socket)
+        public object GetId(System.Net.WebSockets.WebSocket socket)
         {
             return sockets.FirstOrDefault(p => p.Value.WS == socket).Key;
         }
@@ -60,7 +59,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// </summary>
         /// <param name="id">Socket to find Id</param>
         /// <returns>bool</returns>
-        public bool HasConnection(Guid id)
+        public bool HasConnection(object id)
         {
             return sockets.ContainsKey(id);
         }
@@ -70,7 +69,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// </summary>
         /// <param name="socket">WebSocket to add</param>
         /// <param name="socketId">Adding WebSocket's Id</param>
-        public async Task AddSocket(Guid socketId, System.Net.WebSockets.WebSocket socket, WSUserInfo Info)
+        public async Task AddSocket(object socketId, System.Net.WebSockets.WebSocket socket, WSUserInfo Info)
         {
             await Task.Run(() => { sockets.TryAdd(socketId, (socket, Info)); });
         }
@@ -92,7 +91,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// </summary>
         /// <param name="socketId">Socket's Id</param>
         /// <returns>Socket</returns>
-        public async Task RemoveWebSocketIfExists(Guid socketId)
+        public async Task RemoveWebSocketIfExists(object socketId)
         {
             if (HasConnection(socketId))
                 await RemoveSocket(socketId, "WebSocket reconnecting", nitifyClient: false);
@@ -117,7 +116,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// <summary>
         /// Disconnect WebSocket if it exists
         /// </summary>
-        public async Task RemoveSocket(Guid socketId, string closeDescription = "The connection closed by the server", string becauseClause = null, WebSocketCloseStatus closeStatus = WebSocketCloseStatus.NormalClosure, bool nitifyClient = true)
+        public async Task RemoveSocket(object socketId, string closeDescription = "The connection closed by the server", string becauseClause = null, WebSocketCloseStatus closeStatus = WebSocketCloseStatus.NormalClosure, bool nitifyClient = true)
         {
             if (sockets.TryRemove(socketId, out (System.Net.WebSockets.WebSocket WS, WSUserInfo Info) socketInfo))
             {

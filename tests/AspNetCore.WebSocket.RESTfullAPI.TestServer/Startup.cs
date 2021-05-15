@@ -73,7 +73,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestServer
             app.UseRouting();
 
             app.UseAuthorization();
-            app.MapWebSocket("/WSMessenger");
+            app.MapWebSocket("/WSMessenger", keepAliveInterval: 30, receiveBufferSize: 5);
 
             app.UseEndpoints(endpoints =>
             {

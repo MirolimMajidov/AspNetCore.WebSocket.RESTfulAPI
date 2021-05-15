@@ -30,7 +30,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// <param name="socket">New created socket</param>
         /// <param name="userId">Current User's id</param>
         /// <param name="userName">Current User's name</param>
-        public async Task OnConnectedAsync(System.Net.WebSockets.WebSocket socket, Guid userId, string userName)
+        public async Task OnConnectedAsync(System.Net.WebSockets.WebSocket socket, object userId, string userName)
         {
             var info = new WSUserInfo()
             {
@@ -48,7 +48,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// </summary>
         /// <param name="socketId">Id of current WebSocket to disconnect</param>
         /// <returns></returns>
-        public async Task OnDisconnectedAsync(Guid socketId)
+        public async Task OnDisconnectedAsync(object socketId)
         {
             await WebSocketManager.RemoveSocket(socketId, closeDescription: "The connection closed by the client", nitifyClient: false);
         }
@@ -58,7 +58,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// </summary>
         /// <param name="socket">WebSocket to send response message</param>
         /// <param name="responseMessage">The response data to send message</param>
-        public static async Task SendMessageAsync(System.Net.WebSockets.WebSocket socket, string responseMessage, ILogger logger, string method = "", Guid? userId = null)
+        public static async Task SendMessageAsync(System.Net.WebSockets.WebSocket socket, string responseMessage, ILogger logger, string method = "", object userId = null)
         {
             try
             {
@@ -82,7 +82,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// <param name="socket">WebSocket to send response message</param>
         /// <param name="responseData">The response data to send message</param>
         /// <param name="method">Method name to natify the client</param>
-        public static async Task SendNotificationAsync(System.Net.WebSockets.WebSocket socket, object responseData, string method, ILogger logger, Guid? userId = null)
+        public static async Task SendNotificationAsync(System.Net.WebSockets.WebSocket socket, object responseData, string method, ILogger logger, object userId = null)
         {
             var responseMessage = WSRequestModel.SendNotification(responseData, method).GenaretJson();
             await SendMessageAsync(socket, responseMessage: responseMessage, method: method, userId: userId, logger: logger);
@@ -94,7 +94,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// <param name="userId">User's Id to send response message</param>
         /// <param name="responseData">The response data to send message</param>
         /// <param name="method">Method name to natify the client</param>
-        public async Task SendNotificationAsync(Guid userId, object responseData, string method)
+        public async Task SendNotificationAsync(object userId, object responseData, string method)
         {
             var responseMessage = WSRequestModel.SendNotification(responseData, method).GenaretJson();
             await SendMessageAsync(WebSocketManager.GetWebSocket(userId), responseMessage: responseMessage, method: method, userId: userId, logger: _logger);
@@ -106,7 +106,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// <param name="userIds">List of User's Id to send response message</param>
         /// <param name="responseData">The response data to send message</param>
         /// <param name="method">Method name to natify the client</param>
-        public async Task SendNotificationAsync(IEnumerable<Guid> userIds, object responseData, string method)
+        public async Task SendNotificationAsync(IEnumerable<object> userIds, object responseData, string method)
         {
             var responseMessage = WSRequestModel.SendNotification(responseData, method).GenaretJson();
             foreach (var socketId in userIds)
@@ -123,7 +123,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
             WSRequestModel responseModel = null;
             string requestId = string.Empty;
             string requestMethod = string.Empty;
-            Guid? userId = null;
+            object userId = null;
             try
             {
                 var requestModel = JsonConvert.DeserializeObject<WSRequestModel>(receiveMessageData);
@@ -133,7 +133,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
                     _logger.LogInformation($"User id: {userId}, Method: {requestModel.Method}, Request data: {receiveMessageData}");
                 requestId = requestModel.Id;
                 requestMethod = requestModel.Method;
-                if (userInfo == null || userId == Guid.Empty)
+                if (userInfo == null)
                 {
                     responseModel = await WSRequestModel.NotAccessAsync(errorId: 105);
                 }

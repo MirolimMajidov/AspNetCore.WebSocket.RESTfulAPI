@@ -28,7 +28,8 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
                 if (!context.WebSockets.IsWebSocketRequest)
                     return;
 
-                ConnectionAborted abortStatus = Guid.TryParse(context.Request.GetHeaderValue("UserId"), out Guid userId)? ConnectionAborted.None: ConnectionAborted.UserIdNotFound;
+                var userId = context.Request.GetHeaderValue("UserId");
+                ConnectionAborted abortStatus = userId.IsNullOrEmpty()? ConnectionAborted.UserIdNotFound : ConnectionAborted.None;
 
                 var userName = context.Request.GetHeaderValue("UserName");
                 if (userName.IsNullOrEmpty() && abortStatus == ConnectionAborted.None)

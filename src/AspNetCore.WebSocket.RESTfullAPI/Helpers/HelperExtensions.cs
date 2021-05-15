@@ -40,20 +40,6 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         public static bool HasHeader(this HttpRequest request, string key, string value) => request.Headers[key].ToString() == value;
 
         /// <summary>
-        /// This is for get user Id from User of Context
-        /// </summary>
-        /// <param name="user">User of Context</param>
-        /// <returns>User Id</returns>
-        public static Guid GetUserId(this ClaimsPrincipal user)
-        {
-            var result = Guid.TryParse(user.Claims.SingleOrDefault(c => c.Type == "UserId")?.Value, out Guid userId);
-            if (result)
-                return userId;
-            else
-                return Guid.Empty;
-        }
-
-        /// <summary>
         /// This is for get user name from User of Context
         /// </summary>
         /// <param name="user">User of Context</param>
