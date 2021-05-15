@@ -14,6 +14,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Models
         public string Error { get; set; } = string.Empty;
         public bool ShouldSerializeError() => !string.IsNullOrEmpty(Error);
 
+        /// <summary>
+        /// It will be get value when the data returning by Web Socket RESTfull API
+        /// </summary>
         public object Result { get; set; }
         public bool ShouldSerializeResult() => Result != null;
 
@@ -54,6 +57,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Models
         public Dictionary<string, object> Params { get; set; }
         public bool ShouldSerializeParams() => false;
 
+        /// <summary>
+        /// It will be get value when the data sending by Notification
+        /// </summary>
         public object Data { get; set; }
         public bool ShouldSerializeData() => Data != null;
 

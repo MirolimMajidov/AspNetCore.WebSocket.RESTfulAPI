@@ -14,6 +14,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
 
         public static bool LoggAllWSRequest { get; set; }
         public static int WebSocketBufferSize { get; set; }
+        public static string CurrentAssemblyName { get; set; }
 
         /// <summary>
         /// Gets Socket from all active user list by ID

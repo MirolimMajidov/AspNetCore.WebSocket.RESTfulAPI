@@ -141,15 +141,14 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
                 {
                     if (string.IsNullOrEmpty(requestId) || string.IsNullOrEmpty(requestMethod))
                     {
-                        responseModel = await WSRequestModel.NotAccessAsync(errorId: 102);
+                        responseModel = await WSRequestModel.NotAccessAsync(errorId: 2);
                     }
                     else
                     {
                         var methodLevels = requestMethod.Split('.');
                         if (methodLevels.Length == 2)
                         {
-                            string assemblyName = System.Reflection.Assembly.GetCallingAssembly().FullName;
-                            Type callingController = Type.GetType($"Hubs.{methodLevels.First()}Controller, {assemblyName}");
+                            Type callingController = Type.GetType($"{WebSocketManager.CurrentAssemblyName.Split(',').First()}.Hubs.{methodLevels.First()}Controller, {WebSocketManager.CurrentAssemblyName}");
                             if (callingController != null)
                             {
                                 var wsHubMethod = callingController.GetMethods().FirstOrDefault(m => m.GetWSHubAttribute()?.Name == requestModel.Method);
@@ -172,17 +171,17 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
                                 }
                                 else
                                 {
-                                    responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method's parameters is invalid", 106);
+                                    responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method's parameters is invalid", 5);
                                 }
                             }
                             else
                             {
-                                responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method's class is invalid", 104);
+                                responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method of {methodLevels.First()} class is invalid", 4);
                             }
                         }
                         else
                         {
-                            responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request will support only two levels methods", 103);
+                            responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request will support only two levels methods", 3);
                         }
                     }
                 }
@@ -190,7 +189,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Websocket request is invalid");
-                responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request is invalid", 101);
+                responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request is invalid", 1);
             }
 
             if (responseModel != null)

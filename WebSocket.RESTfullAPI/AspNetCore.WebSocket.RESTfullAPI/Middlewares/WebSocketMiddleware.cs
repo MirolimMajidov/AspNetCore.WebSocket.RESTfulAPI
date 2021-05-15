@@ -1,7 +1,5 @@
 ﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
 using AspNetCore.WebSocket.RESTfullAPI.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -91,7 +89,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         /// <returns></returns>
         public static IApplicationBuilder MapWebSocket(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 30)
         {
+            var ass = System.Reflection.Assembly.GetCallingAssembly();
             Services.WebSocketManager.WebSocketBufferSize = 1024 * receiveBufferSize;
+            Services.WebSocketManager.CurrentAssemblyName = System.Reflection.Assembly.GetCallingAssembly().FullName;
             builder.UseWebSockets(new WebSocketOptions() { KeepAliveInterval = TimeSpan.FromSeconds(keepAliveInterval) });
 
             var serviceScopeFactory = builder.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
