@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="AspNetCore.WebSocket.RESTfullAPI" Version="1.0.4" />-->
+    <!--<PackageReference Include="AspNetCore.WebSocket.RESTfullAPI.JWT" Version="1.0.0" />-->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.1.4" />
   </ItemGroup>
