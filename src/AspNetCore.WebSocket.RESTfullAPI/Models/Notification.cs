@@ -1,6 +1,6 @@
 ﻿namespace AspNetCore.WebSocket.RESTfullAPI.Models
 {
-    public class Notification
+    internal class Notification
     {
         public static string WSConnected => "WSConnected";
 

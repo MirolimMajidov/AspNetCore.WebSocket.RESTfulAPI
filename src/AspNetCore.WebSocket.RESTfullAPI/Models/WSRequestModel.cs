@@ -74,7 +74,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Models
         }
     }
 
-    public static class WSRequestModelExtensions
+    internal static class WSRequestModelExtensions
     {
         public static string GenaretJson(this WSRequestModel requestModel)
         {

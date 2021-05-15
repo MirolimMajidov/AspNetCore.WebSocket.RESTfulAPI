@@ -62,6 +62,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestServer
                     o.RouteTemplate = "docs/{documentName}/docs.json";
                     o.RouteTemplate = "docs/{documentName}/docs.json";
                 });
+
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/docs/WS/docs.json", "WebSocket APIs");
@@ -73,7 +74,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestServer
             app.UseRouting();
 
             app.UseAuthorization();
-            app.MapWebSocket("/WSMessenger", keepAliveInterval: 30, receiveBufferSize: 5);
+            app.WebSocketRESTfullAPI("/WSMessenger", receiveBufferSize: 5, keepAliveInterval: 30);
 
             app.UseEndpoints(endpoints =>
             {
