@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Authors>Mirolim Majidov</Authors>
     <Company>PanjakentGroup</Company>
-    <Description>This is for using WebSocket like RESTfull API on AAP.NET Core project to create tool for everything</Description>
+    <Description>This is for using WebSocket like RESTfull API on ASP.NET Core project to create tool for everything. TargetFramework is NetStandard 2.1</Description>
     <PackageIcon>WebSocket.png</PackageIcon>
     <RepositoryType>https://github.com/MirolimMajidov/WebSocket.RESTfullAPI</RepositoryType>
     <RepositoryUrl>https://github.com/MirolimMajidov/WebSocket.RESTfullAPI</RepositoryUrl>
@@ -13,7 +13,7 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>

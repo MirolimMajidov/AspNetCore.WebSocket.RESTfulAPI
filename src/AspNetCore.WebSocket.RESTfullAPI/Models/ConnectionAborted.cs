@@ -6,16 +6,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Models
     {
         None = 0,
 
-        [Display(Name = "The token cannot be empty")]
-        TokenIsEmpty = 1,
-
         [Display(Name = "The token already is expired or invalid")]
-        TokenExpiredOrInvalid = 2,
+        TokenExpiredOrInvalid = 1,
 
         [Display(Name = "The user id not found from header of request")]
-        UserIdNotFound = 3,
+        UserIdNotFound = 2,
 
         [Display(Name = "The user name not found from header of request")]
-        UserNameNotFound = 4,
+        UserNameNotFound = 3,
     }
 }

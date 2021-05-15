@@ -9,7 +9,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
 {
     public class WebSocketManager : Disposable
     {
-        private readonly ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> sockets = new();
+        private readonly ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> sockets = new ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)>();
 
         public static bool LoggAllWSRequest { get; set; }
         public static int WebSocketBufferSize { get; set; }

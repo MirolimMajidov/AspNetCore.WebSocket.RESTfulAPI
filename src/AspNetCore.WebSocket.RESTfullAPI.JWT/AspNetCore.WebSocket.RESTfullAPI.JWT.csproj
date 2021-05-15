@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Authors>Mirolim Majidov</Authors>
+    <Company>PanjakentGroup</Company>
+    <Description>This is for using WebSocket like RESTfull API include authentication JwtBearer on ASP.NET Core project to create tool for everything. TargetFramework is .Net 5.0</Description>
+    <PackageIcon>WebSocket.png</PackageIcon>
+    <RepositoryType>https://github.com/MirolimMajidov/WebSocket.RESTfullAPI</RepositoryType>
+    <RepositoryUrl>https://github.com/MirolimMajidov/WebSocket.RESTfullAPI</RepositoryUrl>
+    <PackageTags>AspNetCore.WebSocket.RESTfullAPI.JWT,AspNetCore.WebSocket.RESTfullAPI, AspNetCore, WebSocket, RESTfullAPI</PackageTags>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.WebSocket.RESTfullAPI" Version="1.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\Mirolim\Desktop\WebSocket.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

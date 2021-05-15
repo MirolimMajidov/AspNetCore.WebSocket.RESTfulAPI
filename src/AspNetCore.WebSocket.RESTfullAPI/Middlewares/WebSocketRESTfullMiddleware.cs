@@ -12,18 +12,18 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
 {
-    public class WebSocketRESTfullMiddleware
+    public class WebSocketRestfullMiddleware
     {
         protected WebSocketHub WebSocketHub { get; set; }
-        protected ILogger<WebSocketRESTfullMiddleware> _logger { get; set; }
+        protected ILogger<WebSocketRestfullMiddleware> _logger { get; set; }
 
-        public WebSocketRESTfullMiddleware(RequestDelegate next, WebSocketHub webSocketHub, ILogger<WebSocketRESTfullMiddleware> logger)
+        public WebSocketRestfullMiddleware(RequestDelegate next, WebSocketHub webSocketHub, ILogger<WebSocketRestfullMiddleware> logger)
         {
             WebSocketHub = webSocketHub;
             _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public virtual async Task InvokeAsync(HttpContext context)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         /// <param name="receiveBufferSize">Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb</param>
         /// <param name="keepAliveInterval">Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds</param>
         /// <returns></returns>
-        public static IApplicationBuilder MapWebSocket<T>(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60) where T : WebSocketRESTfullMiddleware
+        public static IApplicationBuilder MapWebSocket<T>(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60) where T : WebSocketRestfullMiddleware
         {
             Services.WebSocketManager.CurrentAssemblyName = System.Reflection.Assembly.GetEntryAssembly().FullName;
             Services.WebSocketManager.WebSocketBufferSize = 1024 * receiveBufferSize;
@@ -124,7 +124,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         /// <returns></returns>
         public static IApplicationBuilder WebSocketRESTfullAPI(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60)
         {
-            return builder.MapWebSocket<WebSocketRESTfullMiddleware>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize);
+            return builder.MapWebSocket<WebSocketRestfullMiddleware>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize);
         }
     }
 }
