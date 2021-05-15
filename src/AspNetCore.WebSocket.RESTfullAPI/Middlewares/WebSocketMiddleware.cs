@@ -15,12 +15,10 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
     public class WebSocketMiddleware
     {
         private WebSocketHub WebSocketHub { get; set; }
-        private readonly ILogger<WebSocketMiddleware> _logger;
 
-        public WebSocketMiddleware(RequestDelegate next, WebSocketHub webSocketHub, ILogger<WebSocketMiddleware> logger)
+        public WebSocketMiddleware(RequestDelegate next, WebSocketHub webSocketHub)
         {
             WebSocketHub = webSocketHub;
-            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -80,14 +78,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
     public static class WebSocketHubExtensions
     {
         /// <summary>
-        /// TODO
+        /// For mapping path to WebSocketHub and set some Web Socket comf=figuration
         /// </summary>
-        /// <param name="builder"></param>
         /// <param name="path"></param>
         /// <param name="receiveBufferSize">Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb</param>
         /// <param name="keepAliveInterval">Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds</param>
         /// <returns></returns>
-        public static IApplicationBuilder MapWebSocket(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 30)
+        public static IApplicationBuilder MapWebSocket(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60)
         {
             var ass = System.Reflection.Assembly.GetCallingAssembly();
             Services.WebSocketManager.WebSocketBufferSize = 1024 * receiveBufferSize;
