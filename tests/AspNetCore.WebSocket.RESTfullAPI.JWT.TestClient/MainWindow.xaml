@@ -11,7 +11,7 @@
             <TextBlock MinWidth="100px">User name:</TextBlock>
             <TextBox Uid="UserName" x:Name="UserName" MinWidth="600px">Benom</TextBox>
         </StackPanel >
-        <Button Uid="connectButton" x:Name="connectButton" Click="connectButton_Click">Connect</Button>
+        <Button Uid="connectButton" x:Name="connectButton" Click="ConnectButton_Click">Connect</Button>
         <Button Uid="deconnectButton" x:Name="deconnectButton" IsEnabled="False" Click="deconnectButton_Click">Deconnect</Button>
         <StackPanel Orientation="Horizontal">
             <TextBlock MinWidth="150px">User id to send message (Integer):</TextBlock>

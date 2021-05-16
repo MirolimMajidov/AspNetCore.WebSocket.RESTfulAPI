@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -36,21 +38,24 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestClient
             }
         }
 
-        private void connectButton_Click(object sender, RoutedEventArgs e)
+        private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 if (!string.IsNullOrEmpty(UserName.Text))
                 {
                     var userId = new Random().Next(5, 100);
-                    var pairs = new List<KeyValuePair<string, string>>
+                    var values = new Dictionary<string, string>
                     {
-                         new KeyValuePair<string, string>("UserName", UserName.Text),
-                         new KeyValuePair<string, string>("UserId", userId.ToString()),
+                        { "UserName", UserName.Text },
+                        { "UserId", userId.ToString() }
                     };
-                    //var token = GetContext.PostRequest("http://localhost:5000/api/Account/Authorization", pairs).Result;
-                    var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkJlbm9tIiwiVXNlcklkIjoiNDciLCJuYmYiOjE2MjExMDYzNTYsImV4cCI6MTYyMTE5Mjc1NiwiaWF0IjoxNjIxMTA2MzU2LCJpc3MiOiJXU1NlcnZlciIsImF1ZCI6IjlERDI4QUE3LTk2QjYtNDZBMy05RTQ0LUU3QTFDQjg0MzUwRCJ9.evZZdQwDXyCgKDwvWhLms-0JXpLD1gyqey_BnpX_Qk0";
-                    ws.Options.SetRequestHeader("Authorization", "Bearer " + token);
+                    var responce = await GetContext.PostRequest<RequestModel>("http://localhost:5000/api/Account/Authorization", values);
+
+                    if(responce == null || responce.ErrorId>0)
+                        MessageBox.Show($"An error on getting access token '{responce.Error}'");
+
+                    ws.Options.SetRequestHeader("Authorization", "Bearer " + responce.Result);
                     if (ws.State != WebSocketState.Open)
                     {
                         ws.ConnectAsync(new Uri($"ws://localhost:5000/WSMessenger"), CancellationToken.None).GetAwaiter().GetResult();

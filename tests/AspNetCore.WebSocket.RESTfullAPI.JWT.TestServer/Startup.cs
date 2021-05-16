@@ -51,17 +51,8 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer
             });
 
             #endregion
-            
-            services.AddControllers()
-                 .AddNewtonsoftJson(options =>
-                  {
-                      options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                      options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Include;
-                      options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                  }
-             )
-            .AddXmlSerializerFormatters()
-            .AddXmlDataContractSerializerFormatters();
+
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
