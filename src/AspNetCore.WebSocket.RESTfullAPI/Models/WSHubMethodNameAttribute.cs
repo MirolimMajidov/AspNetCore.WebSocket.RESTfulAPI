@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Models
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     // Summary:
     //     Customizes the name of a hub method.
@@ -20,5 +20,5 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Models
         /// The customized name of the hub method
         /// </summary>
         public string Name { get; }
-    }    
+    }
 }

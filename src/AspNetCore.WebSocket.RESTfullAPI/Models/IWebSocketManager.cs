@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Models
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public interface IWebSocketManager
     {

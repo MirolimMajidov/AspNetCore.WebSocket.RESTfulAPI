@@ -6,7 +6,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public static class HelperExtensions
     {
@@ -57,11 +57,6 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         public static string GetUserId(this ClaimsPrincipal user, string claimName = "UserId")
         {
             return user.Claims.SingleOrDefault(c => c.Type == claimName)?.Value;
-        }
-
-        public static bool IsNullOrEmpty(this string str)
-        {
-            return string.IsNullOrEmpty(str);
         }
 
         /// <summary>

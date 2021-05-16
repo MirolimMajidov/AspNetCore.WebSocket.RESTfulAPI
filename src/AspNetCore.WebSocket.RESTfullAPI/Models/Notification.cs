@@ -1,4 +1,4 @@
-﻿namespace AspNetCore.WebSocket.RESTfullAPI.Models
+﻿namespace AspNetCore.WebSocket.RESTfullAPI
 {
     internal class Notification
     {

@@ -5,9 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.WebSocket.RESTfullAPI" Version="1.1.0" />
+    <!--<PackageReference Include="AspNetCore.WebSocket.RESTfullAPI" Version="1.1.0" />-->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AspNetCore.WebSocket.RESTfullAPI\AspNetCore.WebSocket.RESTfullAPI.csproj" />
   </ItemGroup>
 
 </Project>

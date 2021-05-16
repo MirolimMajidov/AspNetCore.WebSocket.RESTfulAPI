@@ -1,6 +1,4 @@
-﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
-using AspNetCore.WebSocket.RESTfullAPI.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Threading.Tasks;
 

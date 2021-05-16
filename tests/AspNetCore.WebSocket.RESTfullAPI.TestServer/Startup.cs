@@ -1,5 +1,3 @@
-using AspNetCore.WebSocket.RESTfullAPI.Configurations;
-using AspNetCore.WebSocket.RESTfullAPI.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -38,11 +36,12 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestServer
                 {
                     Title = "WebSocket APIs documentation",
                     Description = "The server will return some error codes before starting the WebSocket APIs: " +
-                    "1) The problem on excuting Websocket's request; " +
-                    "2) Request's Id or method is empty; " +
-                    "3) Websocket request will support only two levels methods; " +
-                    "4) Sended method of class is invalid; " +
-                    "5) Sended method's parameters is invalid; ",
+                    "101) The problem on excuting Websocket's request; " +
+                    "102) Request's Id or method is empty; " +
+                    "103) Websocket request will support only one or two levels methods; " +
+                    "104) Sended method's class is invalid; " +
+                    "105) The user doesn't exist with sended WS data; " +
+                    "106) Sended method's parameters is invalid; ",
                     Version = "v1"
                 });
             });

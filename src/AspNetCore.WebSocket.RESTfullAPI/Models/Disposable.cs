@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Models
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public abstract class Disposable : IDisposable
     {

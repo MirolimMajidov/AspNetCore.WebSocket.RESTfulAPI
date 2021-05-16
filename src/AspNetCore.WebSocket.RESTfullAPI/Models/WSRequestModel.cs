@@ -3,7 +3,7 @@ using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Models
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public class WSRequestModel
     {

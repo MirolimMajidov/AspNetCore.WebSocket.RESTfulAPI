@@ -1,7 +1,4 @@
-﻿using AspNetCore.WebSocket.RESTfullAPI.Configurations;
-using AspNetCore.WebSocket.RESTfullAPI.Middlewares;
-using AspNetCore.WebSocket.RESTfullAPI.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -11,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Services
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public class WebSocketHub : Disposable
     {

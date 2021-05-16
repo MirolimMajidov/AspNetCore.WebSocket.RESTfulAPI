@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Models
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public enum ConnectionAborted
     {

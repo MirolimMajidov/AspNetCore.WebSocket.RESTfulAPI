@@ -1,9 +1,7 @@
-﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
-using AspNetCore.WebSocket.RESTfullAPI.Services;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Configurations
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public static class WebSocketConfigurations
     {

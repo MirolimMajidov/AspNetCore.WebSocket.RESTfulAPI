@@ -1,6 +1,4 @@
-﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
-using AspNetCore.WebSocket.RESTfullAPI.Services;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -31,15 +29,15 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
 
                 if(!isAuthenticated)
                     abortStatus = ConnectionAborted.TokenExpiredOrInvalid;
-                else if (userId.ToString().IsNullOrEmpty())
+                else if (string.IsNullOrEmpty(userId.ToString()))
                     abortStatus = ConnectionAborted.UserIdNotFound;
-                else if (userName.IsNullOrEmpty())
+                else if (string.IsNullOrEmpty(userName))
                     abortStatus = ConnectionAborted.UserNameNotFound;
 
                 var info = new WSUserInfo()
                 {
-                    UserId = userId,
-                    UserName = userName
+                    Id = userId,
+                    Name = userName
                 };
 
                 //Here you able to pass your own subclass instead of WSUserInfo. Note: If you bind your own subclass instead of WSUserInfo, all your Web Socket controllers should be use your passed subclass

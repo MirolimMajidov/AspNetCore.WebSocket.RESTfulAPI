@@ -1,6 +1,4 @@
-﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
-using AspNetCore.WebSocket.RESTfullAPI.Services;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public class WebSocketRestfullMiddleware
     {
@@ -35,9 +33,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
                 var userName = context.Request.GetHeaderValue("UserName");
                 ConnectionAborted abortStatus = ConnectionAborted.None;
 
-                if (userId.ToString().IsNullOrEmpty())
+                if (string.IsNullOrEmpty(userId.ToString()))
                     abortStatus = ConnectionAborted.UserIdNotFound;
-                else if (userName.IsNullOrEmpty())
+                else if (string.IsNullOrEmpty(userName))
                     abortStatus = ConnectionAborted.UserNameNotFound;
 
                 var info = new WSUserInfo()
@@ -87,7 +85,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         {
             try
             {
-                var buffer = new byte[Services.WebSocketManager.WebSocketBufferSize];
+                var buffer = new byte[WebSocketManager.WebSocketBufferSize];
                 while (socket.State == WebSocketState.Open)
                 {
                     var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer), cancellationToken: CancellationToken.None);
@@ -112,8 +110,8 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         /// <returns></returns>
         public static IApplicationBuilder MapWebSocket<TMiddleware, TWebSocketHub>(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60) where TMiddleware : WebSocketRestfullMiddleware where TWebSocketHub : WebSocketHub
         {
-            Services.WebSocketManager.CurrentAssemblyName = Assembly.GetEntryAssembly().FullName;
-            Services.WebSocketManager.WebSocketBufferSize = 1024 * receiveBufferSize;
+            WebSocketManager.CurrentAssemblyName = Assembly.GetEntryAssembly().FullName;
+            WebSocketManager.WebSocketBufferSize = 1024 * receiveBufferSize;
             builder.UseWebSockets(new WebSocketOptions() { KeepAliveInterval = TimeSpan.FromSeconds(keepAliveInterval) });
 
             var serviceScopeFactory = builder.ApplicationServices.GetRequiredService<IServiceScopeFactory>();

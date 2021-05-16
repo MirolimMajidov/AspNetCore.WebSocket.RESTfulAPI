@@ -1,6 +1,4 @@
-﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
-using AspNetCore.WebSocket.RESTfullAPI.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Linq;
@@ -29,7 +27,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestServer.Hubs
         [SwaggerResponse(0, "Return info when request successfully completed", typeof(string))]
         public async Task<WSRequestModel> DirectWithFriend([SwaggerParameter("This is must be another user's Id", Required = true)] Guid userId, [SwaggerParameter(Required = true)] string message)
         {
-            await _socketHub.SendNotificationAsync(userId, $"{_wsUserInfo.UserName} user send '{message}' message", "Chat.Message");
+            await _socketHub.SendNotificationAsync(userId, $"{_wsUserInfo.Name} user send '{message}' message", "Chat.Message");
             return await WSRequestModel.SuccessAsync($"'{message}' message sended to '{userId}' user");
         }
 
@@ -39,8 +37,8 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestServer.Hubs
         [SwaggerResponse(0, "Return info when request successfully completed", typeof(string))]
         public async Task<WSRequestModel> MessageToAll([SwaggerParameter(Required = true)] string message)
         {
-            var allConnecttedUserIds = _socketHub.WSManager.UsersInfo().Where(id => id != _wsUserInfo.UserId).Select(v => v.UserId);
-            await _socketHub.SendNotificationAsync(allConnecttedUserIds, $"{_wsUserInfo.UserName} user send '{message}' message", "Chat.MessageToAll");
+            var allConnecttedUserIds = _socketHub.WSManager.UsersInfo().Where(user => user.Id != _wsUserInfo.Id).Select(v => v.Id);
+            await _socketHub.SendNotificationAsync(allConnecttedUserIds, $"{_wsUserInfo.Name} user send '{message}' message", "Chat.MessageToAll");
             return await WSRequestModel.SuccessAsync($"'{message}' message sended to all active users");
         }
     }

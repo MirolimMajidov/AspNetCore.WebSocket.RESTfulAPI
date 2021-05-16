@@ -1,6 +1,4 @@
 ﻿using AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Helpers;
-using AspNetCore.WebSocket.RESTfullAPI.Middlewares;
-using AspNetCore.WebSocket.RESTfullAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +25,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Controllers
         [SwaggerResponse(200, "Return token when authorization finished successfully", typeof(string))]
         public async Task<WSRequestModel> Authorization([FromForm, SwaggerParameter("Name of user", Required = true)] string userName, [FromForm, SwaggerParameter("Id of user", Required = true)] int userId)
         {
-            if (userName.IsNullOrEmpty() || userId == 0)
+            if (string.IsNullOrEmpty(userName) || userId == 0)
                 return await WSRequestModel.NotAccessAsync();
 
             var token = await GenerateToken(userName, userId);

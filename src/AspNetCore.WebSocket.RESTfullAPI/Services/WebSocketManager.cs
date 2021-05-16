@@ -1,5 +1,4 @@
-﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
-using NLog;
+﻿using NLog;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Services
+namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public class WebSocketManager : Disposable, IWebSocketManager
     {

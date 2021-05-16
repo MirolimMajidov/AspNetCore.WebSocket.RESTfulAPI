@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.WebSocket.RESTfu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.WebSocket.RESTfullAPI.JWT.TestClient", "tests\AspNetCore.WebSocket.RESTfullAPI.JWT.TestClient\AspNetCore.WebSocket.RESTfullAPI.JWT.TestClient.csproj", "{F523B564-8926-44B0-B5B2-CD14482A5BC8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.WebSocket.RESTfullAPI", "src\AspNetCore.WebSocket.RESTfullAPI\AspNetCore.WebSocket.RESTfullAPI.csproj", "{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,26 @@ Global
 		{F523B564-8926-44B0-B5B2-CD14482A5BC8}.Release|x64.Build.0 = Release|Any CPU
 		{F523B564-8926-44B0-B5B2-CD14482A5BC8}.Release|x86.ActiveCfg = Release|Any CPU
 		{F523B564-8926-44B0-B5B2-CD14482A5BC8}.Release|x86.Build.0 = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|ARM.Build.0 = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|x64.Build.0 = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Debug|x86.Build.0 = Debug|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|ARM.ActiveCfg = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|ARM.Build.0 = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|ARM64.Build.0 = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|x64.ActiveCfg = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|x64.Build.0 = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|x86.ActiveCfg = Release|Any CPU
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +114,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{539C2692-6647-47FB-BF61-8EE185D2D309} = {E13F7671-6335-4FF8-B971-F3CDE50BE93D}
 		{F523B564-8926-44B0-B5B2-CD14482A5BC8} = {E13F7671-6335-4FF8-B971-F3CDE50BE93D}
+		{61AE4FFF-5A67-4C13-A2B2-A17CD09B51B1} = {E13F7671-6335-4FF8-B971-F3CDE50BE93D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0D4D37EF-DE66-4345-BD80-198F5A893504}
