@@ -15,12 +15,12 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
 {
     public class WebSocketHub : Disposable
     {
-        public readonly WebSocketManager WebSocketManager;
+        public readonly IWebSocketManager WSManager;
         private readonly ILogger<WebSocketHub> _logger;
 
-        public WebSocketHub(WebSocketManager webSocketManager, ILogger<WebSocketHub> logger)
+        public WebSocketHub(IWebSocketManager _manager, ILogger<WebSocketHub> logger)
         {
-            WebSocketManager = webSocketManager;
+            WSManager = _manager;
             _logger = logger;
         }
 
@@ -28,19 +28,12 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// To connect new created WebSocket to the WebSocketManager's sockets list
         /// </summary>
         /// <param name="socket">New created socket</param>
-        /// <param name="userId">Current User's id</param>
-        /// <param name="userName">Current User's name</param>
-        public async Task OnConnectedAsync(System.Net.WebSockets.WebSocket socket, object userId, string userName)
+        /// <param name="userInfo">Current User info</param>
+        public virtual async Task OnConnectedAsync(System.Net.WebSockets.WebSocket socket, WSUserInfo userInfo)
         {
-            var info = new WSUserInfo()
-            {
-                UserId = userId,
-                UserName = userName
-            };
+            await WSManager.AddSocket(userInfo.UserId, socket, userInfo);
 
-            await WebSocketManager.AddSocket(userId, socket, info);
-
-            await SendNotificationAsync(userId, new { }, Notification.WSConnected);
+            await SendNotificationAsync(userInfo.UserId, new { }, Notification.WSConnected);
         }
 
         /// <summary>
@@ -48,9 +41,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// </summary>
         /// <param name="socketId">Id of current WebSocket to disconnect</param>
         /// <returns></returns>
-        public async Task OnDisconnectedAsync(object socketId)
+        public virtual async Task OnDisconnectedAsync(object socketId)
         {
-            await WebSocketManager.RemoveSocket(socketId, closeDescription: "The connection closed by the client", nitifyClient: false);
+            await WSManager.RemoveSocket(socketId, closeDescription: "The connection closed by the client", nitifyClient: false);
         }
 
         /// <summary>
@@ -97,7 +90,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         public async Task SendNotificationAsync(object userId, object responseData, string method)
         {
             var responseMessage = WSRequestModel.SendNotification(responseData, method).GenaretJson();
-            await SendMessageAsync(WebSocketManager.GetWebSocket(userId), responseMessage: responseMessage, method: method, userId: userId, logger: _logger);
+            await SendMessageAsync(WSManager.GetWebSocket(userId), responseMessage: responseMessage, method: method, userId: userId, logger: _logger);
         }
 
         /// <summary>
@@ -110,7 +103,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         {
             var responseMessage = WSRequestModel.SendNotification(responseData, method).GenaretJson();
             foreach (var socketId in userIds)
-                await SendMessageAsync(WebSocketManager.GetWebSocket(socketId), responseMessage: responseMessage, method: method, userId: socketId, logger: _logger);
+                await SendMessageAsync(WSManager.GetWebSocket(socketId), responseMessage: responseMessage, method: method, userId: socketId, logger: _logger);
         }
 
         /// <summary>
@@ -127,7 +120,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
             try
             {
                 var requestModel = JsonConvert.DeserializeObject<WSRequestModel>(receiveMessageData);
-                var userInfo = WebSocketManager.GetInfo(socket);
+                var userInfo = WSManager.GetUserInfo(socket);
                 userId = userInfo?.UserId;
                 if (WebSocketManager.LoggAllWSRequest)
                     _logger.LogInformation($"User id: {userId}, Method: {requestModel.Method}, Request data: {receiveMessageData}");

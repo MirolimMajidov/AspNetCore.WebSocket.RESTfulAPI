@@ -27,10 +27,10 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Hubs
         [WSHubMethodName("Chat.DirectWithFriend")]
         [SwaggerOperation(Summary = "This is only for messaging one user with own friend")]
         [SwaggerResponse(0, "Return true when request successfully completed", typeof(string))]
-        public async Task<WSRequestModel> DirectWithFriend([SwaggerParameter("This is must be another user's Id", Required = true)] Guid userId, [SwaggerParameter(Required = true)] string message)
+        public async Task<WSRequestModel> DirectWithFriend([SwaggerParameter("This is must be another user's Id", Required = true)] int userId, [SwaggerParameter(Required = true)] string message)
         {
             await _socketHub.SendNotificationAsync(userId, $"{_wsUserInfo.UserName} user send '{message}' message", "Chat.DirectWithFriend");
-            return await WSRequestModel.SuccessAsync();
+            return await WSRequestModel.SuccessAsync($"'{message}' message sended to '{userId}' user");
         }
 
         [HttpPost("Chat.MessageToAll")]
@@ -39,9 +39,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Hubs
         [SwaggerResponse(0, "Return true when request successfully completed", typeof(bool))]
         public async Task<WSRequestModel> MessageToAll([SwaggerParameter(Required = true)] string message)
         {
-            var allConnecttedUserIds = _socketHub.WebSocketManager.Clients().Values.Select(v => v.Info.UserId);
-            await _socketHub.SendNotificationAsync(allConnecttedUserIds.Where(id => id != _wsUserInfo.UserId), $"{_wsUserInfo.UserName} user send '{message}' message", "Chat.MessageToAll");
-            return await WSRequestModel.SuccessAsync();
+            var allConnecttedUserIds = _socketHub.WSManager.UsersInfo().Where(id => id != _wsUserInfo.UserId).Select(v => v.UserId);
+            await _socketHub.SendNotificationAsync(allConnecttedUserIds, $"{_wsUserInfo.UserName} user send '{message}' message", "Chat.MessageToAll");
+            return await WSRequestModel.SuccessAsync($"'{message}' message sended to all active users");
         }
     }
 }

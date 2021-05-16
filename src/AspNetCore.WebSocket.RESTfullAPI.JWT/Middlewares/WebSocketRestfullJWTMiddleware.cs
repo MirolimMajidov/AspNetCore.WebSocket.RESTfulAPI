@@ -37,7 +37,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
                 else if (userName.IsNullOrEmpty())
                     abortStatus = ConnectionAborted.UserNameNotFound;
 
-                await InvokeWSAsync(context, userId, userName, abortStatus);
+                var info = new WSUserInfo()
+                {
+                    UserId = userId,
+                    UserName = userName
+                };
+
+                await InvokeWSAsync(context, info, abortStatus);
             }
             catch (Exception ex)
             {
@@ -57,7 +63,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         /// <returns></returns>
         public static IApplicationBuilder WebSocketRESTfullJWT(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60)
         {
-            return builder.MapWebSocket<WebSocketRestfullJWTMiddleware>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize);
+            return builder.MapWebSocket<WebSocketRestfullJWTMiddleware, WebSocketHub>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize);
         }
     }
 }

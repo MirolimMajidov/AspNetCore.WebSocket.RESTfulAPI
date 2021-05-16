@@ -1,5 +1,6 @@
 ﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.WebSocket.RESTfullAPI.Services
 {
-    public class WebSocketManager : Disposable
+    public class WebSocketManager : Disposable, IWebSocketManager
     {
         private readonly ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> sockets = new ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)>();
 
@@ -15,7 +16,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         public static int WebSocketBufferSize { get; set; }
         public static string CurrentAssemblyName { get; set; }
 
-        /// <summary>
+        /// <summary/>
         /// Gets Socket from all active user list by ID
         /// </summary>
         /// <param name="socketId">Socket's Id</param>
@@ -30,7 +31,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// </summary>
         /// <param name="socket">WebSocket</param>
         /// <returns>Info</returns>
-        public WSUserInfo GetInfo(System.Net.WebSockets.WebSocket socket)
+        public WSUserInfo GetUserInfo(System.Net.WebSockets.WebSocket socket)
         {
             return sockets.FirstOrDefault(p => p.Value.WS == socket).Value.Info;
         }
@@ -38,10 +39,28 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// <summary>
         /// Gets all active user WebSockets list
         /// </summary>
-        /// <returns>Lsit of WebSockets</returns>
+        /// <returns>List of WebSockets</returns>
         public ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> Clients()
         {
             return sockets;
+        }
+
+        /// <summary>
+        /// Gets all active user info of clients
+        /// </summary>
+        /// <returns>List of Users Info</returns>
+        public IEnumerable<WSUserInfo> UsersInfo()
+        {
+            return sockets.Select(s => s.Value.Info);
+        }
+
+        /// <summary>
+        /// Gets all active Web sockets of clients
+        /// </summary>
+        /// <returns>List of WebSockets</returns>
+        public IEnumerable<System.Net.WebSockets.WebSocket> WebSockets()
+        {
+            return sockets.Select(s => s.Value.WS);
         }
 
         /// <summary>
@@ -52,16 +71,6 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         public object GetId(System.Net.WebSockets.WebSocket socket)
         {
             return sockets.FirstOrDefault(p => p.Value.WS == socket).Key;
-        }
-
-        /// <summary>
-        /// To check has connection or not 
-        /// </summary>
-        /// <param name="id">Socket to find Id</param>
-        /// <returns>bool</returns>
-        public bool HasConnection(object id)
-        {
-            return sockets.ContainsKey(id);
         }
 
         /// <summary>
@@ -93,7 +102,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// <returns>Socket</returns>
         public async Task RemoveWebSocketIfExists(object socketId)
         {
-            if (HasConnection(socketId))
+            if (sockets.ContainsKey(socketId))
                 await RemoveSocket(socketId, "WebSocket reconnecting", nitifyClient: false);
         }
 

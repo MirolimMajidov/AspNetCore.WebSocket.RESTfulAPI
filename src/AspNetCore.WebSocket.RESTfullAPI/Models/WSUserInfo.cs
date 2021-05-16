@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AspNetCore.WebSocket.RESTfullAPI.Models
+﻿namespace AspNetCore.WebSocket.RESTfullAPI.Models
 {
     public class WSUserInfo : Disposable
     {

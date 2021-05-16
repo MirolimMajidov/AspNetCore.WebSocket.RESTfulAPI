@@ -14,8 +14,14 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Configurations
 
         public static IServiceCollection AddWebSocketManager(this IServiceCollection services)
         {
-            services.AddSingleton<WebSocketManager>();
+            services.AddSingleton<IWebSocketManager, WebSocketManager>();
             services.AddScoped<WebSocketHub>();
+
+            foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
+            {
+                if (type.GetTypeInfo().BaseType == typeof(WebSocketHub))
+                    services.AddScoped(type);
+            }
 
             return services;
         }

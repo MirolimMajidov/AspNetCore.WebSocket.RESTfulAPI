@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.WebSockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +40,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
                 else if (userName.IsNullOrEmpty())
                     abortStatus = ConnectionAborted.UserNameNotFound;
 
-                await InvokeWSAsync(context, userId, userName, abortStatus);
+                var info = new WSUserInfo()
+                {
+                    UserId = userId,
+                    UserName = userName
+                };
+
+                await InvokeWSAsync(context, info, abortStatus);
             }
             catch (Exception ex)
             {
@@ -47,28 +54,28 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
             }
         }
 
-        protected async Task InvokeWSAsync(HttpContext context, object userId, string userName, ConnectionAborted abortStatus = ConnectionAborted.None)
+        protected async Task InvokeWSAsync(HttpContext context, WSUserInfo userInfo, ConnectionAborted abortStatus = ConnectionAborted.None)
         {
             try
             {
-                await WebSocketHub.WebSocketManager.RemoveWebSocketIfExists(userId);
+                await WebSocketHub.WSManager.RemoveWebSocketIfExists(userInfo.UserId);
                 var socket = await context.WebSockets.AcceptWebSocketAsync();
 
                 if (abortStatus == ConnectionAborted.None)
                 {
-                    await WebSocketHub.OnConnectedAsync(socket, userId, userName);
+                    await WebSocketHub.OnConnectedAsync(socket, userInfo);
 
                     await Receive(socket, async (result, buffer) =>
                     {
                         if (result.MessageType == WebSocketMessageType.Binary)
                             await WebSocketHub.ReceiveMessageAsync(socket, Encoding.UTF8.GetString(buffer, 0, result.Count));
                         else
-                            await WebSocketHub.OnDisconnectedAsync(userId);
+                            await WebSocketHub.OnDisconnectedAsync(userInfo.UserId);
                         return;
                     });
                 }
                 else
-                    await WebSocketHub.WebSocketManager.AbortConnection(socket, abortStatus);
+                    await WebSocketHub.WSManager.AbortConnection(socket, abortStatus);
             }
             catch
             {
@@ -89,7 +96,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
             }
             catch
             {
-                await WebSocketHub.OnDisconnectedAsync(WebSocketHub.WebSocketManager.GetId(socket));
+                await WebSocketHub.OnDisconnectedAsync(WebSocketHub.WSManager.GetId(socket));
             }
         }
     }
@@ -103,16 +110,16 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         /// <param name="receiveBufferSize">Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb</param>
         /// <param name="keepAliveInterval">Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds</param>
         /// <returns></returns>
-        public static IApplicationBuilder MapWebSocket<T>(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60) where T : WebSocketRestfullMiddleware
+        public static IApplicationBuilder MapWebSocket<TMiddleware, TWebSocketHub>(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60) where TMiddleware : WebSocketRestfullMiddleware where TWebSocketHub : WebSocketHub
         {
-            Services.WebSocketManager.CurrentAssemblyName = System.Reflection.Assembly.GetEntryAssembly().FullName;
+            Services.WebSocketManager.CurrentAssemblyName = Assembly.GetEntryAssembly().FullName;
             Services.WebSocketManager.WebSocketBufferSize = 1024 * receiveBufferSize;
             builder.UseWebSockets(new WebSocketOptions() { KeepAliveInterval = TimeSpan.FromSeconds(keepAliveInterval) });
 
             var serviceScopeFactory = builder.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
             var serviceProvider = serviceScopeFactory.CreateScope().ServiceProvider;
 
-            return builder.Map(path, (_app) => _app.UseMiddleware<T>(serviceProvider.GetService<WebSocketHub>()));
+            return builder.Map(path, (_app) => _app.UseMiddleware<TMiddleware>(serviceProvider.GetService<TWebSocketHub>()));
         }
 
         /// <summary>
@@ -124,7 +131,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         /// <returns></returns>
         public static IApplicationBuilder WebSocketRESTfullAPI(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60)
         {
-            return builder.MapWebSocket<WebSocketRestfullMiddleware>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize);
+            return builder.MapWebSocket<WebSocketRestfullMiddleware, WebSocketHub>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize);
         }
     }
 }
