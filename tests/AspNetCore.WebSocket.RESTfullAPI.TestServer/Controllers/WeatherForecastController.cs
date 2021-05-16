@@ -24,10 +24,10 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestServer.Controllers
         }
 
         [HttpGet]
-        public async Task<WSRequestModel> Get()
+        public async Task<ResponseModel> Get()
         {
             var rng = new Random();
-            return await WSRequestModel.SuccessAsync(Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            return await ResponseModel.SuccessRequestAsync(Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),

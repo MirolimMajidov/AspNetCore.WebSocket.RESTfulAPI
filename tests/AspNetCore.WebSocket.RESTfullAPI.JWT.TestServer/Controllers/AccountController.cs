@@ -23,19 +23,19 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Controllers
         [HttpPost("Authorization")]
         [SwaggerOperation(Summary = "For authorization user to jobs services")]
         [SwaggerResponse(200, "Return token when authorization finished successfully", typeof(string))]
-        public async Task<WSRequestModel> Authorization([FromForm, SwaggerParameter("Name of user", Required = true)] string userName, [FromForm, SwaggerParameter("Id of user", Required = true)] int userId)
+        public async Task<ResponseModel> Authorization([FromForm, SwaggerParameter("Name of user", Required = true)] string userName, [FromForm, SwaggerParameter("Id of user", Required = true)] int userId)
         {
             if (string.IsNullOrEmpty(userName) || userId == 0)
-                return await WSRequestModel.NotAccessAsync();
+                return await ResponseModel.NotAccessAsync();
 
             var token = await GenerateToken(userName, userId);
-            return await WSRequestModel.SuccessAsync(token);
+            return await ResponseModel.SuccessRequestAsync(token);
         }
 
         [HttpGet("UserInfo")]
-        public async Task<WSRequestModel> UserInfo()
+        public async Task<ResponseModel> UserInfo()
         {
-            return await WSRequestModel.SuccessAsync(new { User.Identity?.IsAuthenticated, UserName = User.GetUserName(), UserId = User.GetUserId()});
+            return await ResponseModel.SuccessRequestAsync(new { User.Identity?.IsAuthenticated, UserName = User.GetUserName(), UserId = User.GetUserId()});
         }
 
         /// <summary>

@@ -23,9 +23,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestServer.Hubs
         [WSHubMethodName("User.Info")]
         [SwaggerOperation(Summary = "Gets current user's info")]
         [SwaggerResponse(0, "Return user info", typeof(WSUserInfo))]
-        public async Task<WSRequestModel> GetUserMyData()
+        public async Task<ResponseModel> GetUserMyData()
         {
-            return await WSRequestModel.SuccessAsync(_wsUserInfo);
+            return await ResponseModel.SuccessRequestAsync(_wsUserInfo);
         }
     }
 }

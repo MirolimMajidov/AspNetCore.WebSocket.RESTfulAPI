@@ -73,7 +73,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// <param name="method">Method name to natify the client</param>
         public static async Task SendNotificationAsync(System.Net.WebSockets.WebSocket socket, object responseData, string method, ILogger logger, object userId = null)
         {
-            var responseMessage = WSRequestModel.SendNotification(responseData, method).GenaretJson();
+            var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson();
             await SendMessageAsync(socket, responseMessage: responseMessage, method: method, userId: userId, logger: logger);
         }
 
@@ -85,7 +85,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// <param name="method">Method name to natify the client</param>
         public async Task SendNotificationAsync(object userId, object responseData, string method)
         {
-            var responseMessage = WSRequestModel.SendNotification(responseData, method).GenaretJson();
+            var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson();
             await SendMessageAsync(WSManager.GetWebSocket(userId), responseMessage: responseMessage, method: method, userId: userId, logger: _logger);
         }
 
@@ -97,7 +97,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// <param name="method">Method name to natify the client</param>
         public async Task SendNotificationAsync(IEnumerable<object> userIds, object responseData, string method)
         {
-            var responseMessage = WSRequestModel.SendNotification(responseData, method).GenaretJson();
+            var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson();
             foreach (var socketId in userIds)
                 await SendMessageAsync(WSManager.GetWebSocket(socketId), responseMessage: responseMessage, method: method, userId: socketId, logger: _logger);
         }
@@ -109,13 +109,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// <param name="receiveMessageData">Receive message data from user</param>
         public async Task ReceiveMessageAsync(System.Net.WebSockets.WebSocket socket, string receiveMessageData)
         {
-            WSRequestModel responseModel = null;
+            ResponseModel responseModel = null;
             string requestId = string.Empty;
             string requestMethod = string.Empty;
             object userId = null;
             try
             {
-                var requestModel = JsonConvert.DeserializeObject<WSRequestModel>(receiveMessageData);
+                var requestModel = JsonConvert.DeserializeObject<NotificationResponseModel>(receiveMessageData);
                 var userInfo = WSManager.GetUserInfo(socket);
                 userId = userInfo?.Id;
                 if (WebSocketManager.LoggAllWSRequest)
@@ -124,13 +124,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                 requestMethod = requestModel.Method;
                 if (userInfo == null)
                 {
-                    responseModel = await WSRequestModel.NotAccessAsync(errorId: 105);
+                    responseModel = await ResponseModel.NotAccessAsync(errorId: 105);
                 }
                 else
                 {
                     if (string.IsNullOrEmpty(requestId) || string.IsNullOrEmpty(requestMethod))
                     {
-                        responseModel = await WSRequestModel.NotAccessAsync(errorId: 102);
+                        responseModel = await ResponseModel.NotAccessAsync(errorId: 102);
                     }
                     else
                     {
@@ -156,21 +156,21 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                                         methodParams = parameters.ToArray();
                                     }
                                     var callingClass = Activator.CreateInstance(callingController, new object[] { this, userInfo });
-                                    responseModel = await (Task<WSRequestModel>)wsHubMethod.Invoke(callingClass, methodParams);
+                                    responseModel = await (Task<ResponseModel>)wsHubMethod.Invoke(callingClass, methodParams);
                                 }
                                 else
                                 {
-                                    responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method's parameters is invalid", 106);
+                                    responseModel = await ResponseModel.ErrorRequestAsync($"{requestMethod} method's parameters is invalid", 106);
                                 }
                             }
                             else
                             {
-                                responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method of {methodLevels.First()} class is invalid", 104);
+                                responseModel = await ResponseModel.ErrorRequestAsync($"{requestMethod} method of {methodLevels.First()} class is invalid", 104);
                             }
                         }
                         else
                         {
-                            responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request will support only two levels methods", 103);
+                            responseModel = await ResponseModel.ErrorRequestAsync("Websocket request will support only two levels methods", 103);
                         }
                     }
                 }
@@ -178,12 +178,12 @@ namespace AspNetCore.WebSocket.RESTfullAPI
             catch (Exception ex)
             {
                 _logger.Error(ex, "Websocket request is invalid");
-                responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request is invalid", 101);
+                responseModel = await ResponseModel.ErrorRequestAsync("Websocket request is invalid", 101);
             }
 
             if (responseModel != null)
             {
-                var response = new WSRequestModel()
+                var response = new NotificationResponseModel()
                 {
                     Id = requestId,
                     Method = requestMethod,
@@ -191,7 +191,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                     Error = responseModel.Error,
                     Result = responseModel.Result
                 };
-                await SendMessageAsync(socket, response.GenaretJson(), logger: _logger, method: response.Method, userId: userId);
+                await SendMessageAsync(socket, response.GenerateJson(), logger: _logger, method: response.Method, userId: userId);
             }
         }
     }

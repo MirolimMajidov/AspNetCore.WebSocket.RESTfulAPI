@@ -24,21 +24,21 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Hubs
         [WSHubMethodName("Chat.Message")]
         [SwaggerOperation(Summary = "This is only for messaging one user with own friend")]
         [SwaggerResponse(0, "Return info when request successfully completed", typeof(string))]
-        public async Task<WSRequestModel> DirectWithFriend([SwaggerParameter("This is must be another user's Id", Required = true)] int userId, [SwaggerParameter(Required = true)] string message)
+        public async Task<ResponseModel> DirectWithFriend([SwaggerParameter("This is must be another user's Id", Required = true)] int userId, [SwaggerParameter(Required = true)] string message)
         {
             await _socketHub.SendNotificationAsync(userId, $"{_wsUserInfo.Name} user send '{message}' message", "Chat.Message");
-            return await WSRequestModel.SuccessAsync($"'{message}' message sended to '{userId}' user");
+            return await ResponseModel.SuccessRequestAsync($"'{message}' message sended to '{userId}' user");
         }
 
         [HttpPost("Chat.MessageToAll")]
         [WSHubMethodName("Chat.MessageToAll")]
         [SwaggerOperation(Summary = "This is for sending message to all another user")]
         [SwaggerResponse(0, "Return info when request successfully completed", typeof(string))]
-        public async Task<WSRequestModel> MessageToAll([SwaggerParameter(Required = true)] string message)
+        public async Task<ResponseModel> MessageToAll([SwaggerParameter(Required = true)] string message)
         {
             var allConnecttedUserIds = _socketHub.WSManager.UsersInfo().Where(user => user.Id != _wsUserInfo.Id).Select(v => v.Id);
             await _socketHub.SendNotificationAsync(allConnecttedUserIds, $"{_wsUserInfo.Name} user send '{message}' message", "Chat.MessageToAll");
-            return await WSRequestModel.SuccessAsync($"'{message}' message sended to all active users");
+            return await ResponseModel.SuccessRequestAsync($"'{message}' message sended to all active users");
         }
     }
 }
