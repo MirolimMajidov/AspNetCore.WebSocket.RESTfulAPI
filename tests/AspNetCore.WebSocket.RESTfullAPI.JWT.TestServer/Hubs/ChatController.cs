@@ -11,10 +11,10 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Hubs
     [SwaggerTag("All WebSocket APIs related to chat")]
     public class ChatController
     {
-        private readonly WebSocketHub _socketHub;
+        private readonly WSHub _socketHub;
         private readonly WSUserInfo _wsUserInfo;
 
-        public ChatController(WebSocketHub socketHub, WSUserInfo wsUserInfo)
+        public ChatController(WSHub socketHub, WSUserInfo wsUserInfo)
         {
             _socketHub = socketHub;
             _wsUserInfo = wsUserInfo;

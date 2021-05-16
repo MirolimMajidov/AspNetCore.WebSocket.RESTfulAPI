@@ -10,10 +10,10 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Hubs
     [SwaggerTag("All WebSocket APIs related to user")]
     public class UserController
     {
-        private readonly WebSocketHub _socketHub;
+        private readonly WSHub _socketHub;
         private readonly WSUserInfo _wsUserInfo;
 
-        public UserController(WebSocketHub socketHub, WSUserInfo wsUserInfo)
+        public UserController(WSHub socketHub, WSUserInfo wsUserInfo)
         {
             _socketHub = socketHub;
             _wsUserInfo = wsUserInfo;

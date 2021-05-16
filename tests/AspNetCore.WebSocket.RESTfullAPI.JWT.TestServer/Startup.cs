@@ -1,5 +1,4 @@
 using AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Configurations;
-using AspNetCore.WebSocket.RESTfullAPI.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +22,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer
         {
             services.AddAuthentications();
             services.AddWebSocketManager();
+            //services.AddScoped<WSHub>();
 
             #region API Documents
 

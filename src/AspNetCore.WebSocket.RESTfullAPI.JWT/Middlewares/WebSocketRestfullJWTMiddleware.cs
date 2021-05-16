@@ -8,11 +8,11 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
+namespace AspNetCore.WebSocket.RESTfullAPI.JWT
 {
     public class WebSocketRestfullJWTMiddleware : WebSocketRestfullMiddleware
     {
-        public WebSocketRestfullJWTMiddleware(RequestDelegate next, WebSocketHub webSocketHub, ILogger<WebSocketRestfullJWTMiddleware> logger) : base(next, webSocketHub, logger)
+        public WebSocketRestfullJWTMiddleware(RequestDelegate next, WSHub webSocketHub, ILogger<WebSocketRestfullJWTMiddleware> logger) : base(next, webSocketHub, logger)
         {
         }
 
@@ -47,7 +47,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error on opening connection of WebSocket to the server");
+                Logger.LogError(ex, "An error on opening connection of WebSocket to the server");
             }
         }
     }
@@ -57,14 +57,14 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         /// <summary>
         /// For mapping path to WebSocket RESTfull API and set some Web Socket comfigurations
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Path to bind Web socket</param>
         /// <param name="receiveBufferSize">Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb</param>
         /// <param name="keepAliveInterval">Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds</param>
-        /// <returns></returns>
-        public static IApplicationBuilder WebSocketRESTfullJWT(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60)
+        /// <param name="loggAllWebSocketRequestAndResponse">When you turn on it all request and response data of web socket will be logged to the your configurated file. By default it's false because it can be effect to performance</param>
+        public static IApplicationBuilder WebSocketRESTfullJWT(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60, bool loggAllWebSocketRequestAndResponse = false)
         {
             //Here you able to bind your own subclasses instead of WebSocketRestfullMiddleware and WebSocketHub generic types. Note: If you bind your own subclass instead of WebSocketHub, all your Web Socket controllers should be use your binded subclass
-            return builder.MapWebSocket<WebSocketRestfullJWTMiddleware, WebSocketHub>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize);
+            return builder.MapWebSocket<WebSocketRestfullJWTMiddleware, WSHub>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize, loggAllWebSocketRequestAndResponse: loggAllWebSocketRequestAndResponse);
         }
     }
 }

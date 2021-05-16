@@ -14,12 +14,12 @@ namespace AspNetCore.WebSocket.RESTfullAPI
     public class WebSocketRestfullMiddleware
     {
         protected WebSocketHub WebSocketHub { get; set; }
-        protected ILogger<WebSocketRestfullMiddleware> _logger { get; set; }
+        protected ILogger<WebSocketRestfullMiddleware> Logger { get; set; }
 
         public WebSocketRestfullMiddleware(RequestDelegate next, WebSocketHub webSocketHub, ILogger<WebSocketRestfullMiddleware> logger)
         {
             WebSocketHub = webSocketHub;
-            _logger = logger;
+            Logger = logger;
         }
 
         public virtual async Task InvokeAsync(HttpContext context)
@@ -48,7 +48,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error on opening connection of WebSocket to the server");
+                Logger.LogError(ex, "An error on opening connection of WebSocket to the server");
             }
         }
 
@@ -104,12 +104,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// <summary>
         /// For mapping path to WebSocketHub and set some Web Socket comfigurations
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Path to bind Web socket</param>
         /// <param name="receiveBufferSize">Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb</param>
         /// <param name="keepAliveInterval">Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds</param>
-        /// <returns></returns>
-        public static IApplicationBuilder MapWebSocket<TMiddleware, TWebSocketHub>(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60) where TMiddleware : WebSocketRestfullMiddleware where TWebSocketHub : WebSocketHub
+        /// <param name="loggAllWebSocketRequestAndResponse">When you turn on it all request and response data of web socket will be logged to the your configurated file. By default it's false because it can be effect to performance</param>
+        public static IApplicationBuilder MapWebSocket<TMiddleware, TWebSocketHub>(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60, bool loggAllWebSocketRequestAndResponse = false) where TMiddleware : WebSocketRestfullMiddleware where TWebSocketHub : WebSocketHub
         {
+            WebSocketManager.LoggAllWSRequest = loggAllWebSocketRequestAndResponse;
             WebSocketManager.CurrentAssemblyName = Assembly.GetEntryAssembly().FullName;
             WebSocketManager.WebSocketBufferSize = 1024 * receiveBufferSize;
             builder.UseWebSockets(new WebSocketOptions() { KeepAliveInterval = TimeSpan.FromSeconds(keepAliveInterval) });
@@ -117,19 +118,20 @@ namespace AspNetCore.WebSocket.RESTfullAPI
             var serviceScopeFactory = builder.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
             var serviceProvider = serviceScopeFactory.CreateScope().ServiceProvider;
 
+
             return builder.Map(path, (_app) => _app.UseMiddleware<TMiddleware>(serviceProvider.GetService<TWebSocketHub>()));
         }
 
         /// <summary>
         /// For mapping path to WebSocket RESTfull API and set some Web Socket comfigurations
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Path to bind Web socket</param>
         /// <param name="receiveBufferSize">Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb</param>
         /// <param name="keepAliveInterval">Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds</param>
-        /// <returns></returns>
-        public static IApplicationBuilder WebSocketRESTfullAPI(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60)
+        /// <param name="loggAllWebSocketRequestAndResponse">When you turn on it all request and response data of web socket will be logged to the your configurated file. By default it's false because it can be effect to performance</param>
+        public static IApplicationBuilder WebSocketRESTfullAPI(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60, bool loggAllWebSocketRequestAndResponse = false)
         {
-            return builder.MapWebSocket<WebSocketRestfullMiddleware, WebSocketHub>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize);
+            return builder.MapWebSocket<WebSocketRestfullMiddleware, WebSocketHub>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize, loggAllWebSocketRequestAndResponse: loggAllWebSocketRequestAndResponse);
         }
     }
 }

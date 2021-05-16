@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 using System.Reflection;
 
 namespace AspNetCore.WebSocket.RESTfullAPI
@@ -15,9 +16,10 @@ namespace AspNetCore.WebSocket.RESTfullAPI
             services.AddSingleton<IWebSocketManager, WebSocketManager>();
             services.AddScoped<WebSocketHub>();
 
-            foreach (var type in Assembly.GetEntryAssembly().ExportedTypes)
+            var allAssemblies = Assembly.GetEntryAssembly().GetReferencedAssemblies().Select(name => Assembly.Load(name)).ToList();
+            foreach (var type in allAssemblies.SelectMany(a => a.ExportedTypes))
             {
-                if (type.GetTypeInfo().BaseType == typeof(WebSocketHub))
+                if (type.BaseType == typeof(WebSocketHub))
                     services.AddScoped(type);
             }
 
