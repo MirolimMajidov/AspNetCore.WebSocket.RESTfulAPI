@@ -7,6 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -35,7 +36,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Controllers
         [HttpGet("UserInfo")]
         public async Task<ResponseModel> UserInfo()
         {
-            return await ResponseModel.SuccessRequestAsync(new { User.Identity?.IsAuthenticated, UserName = User.GetUserName(), UserId = User.GetUserId()});
+            return await ResponseModel.SuccessRequestAsync(new { User.Identity?.IsAuthenticated, UserName = User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value, UserId = User.Claims.SingleOrDefault(c => c.Type == "UserId")?.Value });
         }
 
         /// <summary>

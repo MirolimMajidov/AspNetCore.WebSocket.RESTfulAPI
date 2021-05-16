@@ -22,9 +22,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         UserDoesNotHaveAccess = 5,
 
         [Display(Name = "The user id not found from header of request")]
-        UserIdNotFound = 2,
+        UserIdNotFound = 6,
 
         [Display(Name = "The user name not found from header of request")]
-        UserNameNotFound = 3,
+        UserNameNotFound = 7,
     }
 }

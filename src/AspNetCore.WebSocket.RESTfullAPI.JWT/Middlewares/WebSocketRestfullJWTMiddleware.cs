@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
@@ -23,11 +25,11 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
 
                 var authResult = await context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
                 var isAuthenticated = authResult.Succeeded && authResult.Principal.Identity.IsAuthenticated;
-                object userId = isAuthenticated ? authResult.Principal.GetUserId() : Guid.NewGuid();
-                string userName = isAuthenticated ? authResult.Principal.GetUserName() : string.Empty;
+                object userId = isAuthenticated ? authResult.Principal.Claims.SingleOrDefault(c => c.Type == "UserId")?.Value : Guid.NewGuid();
+                string userName = isAuthenticated ? authResult.Principal.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value : string.Empty;
                 ConnectionAborted abortStatus = ConnectionAborted.None;
 
-                if(!isAuthenticated)
+                if (!isAuthenticated)
                     abortStatus = ConnectionAborted.TokenExpiredOrInvalid;
                 else if (string.IsNullOrEmpty(userId.ToString()))
                     abortStatus = ConnectionAborted.UserIdNotFound;
