@@ -42,8 +42,8 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
 
                 var info = new WSUserInfo()
                 {
-                    UserId = userId,
-                    UserName = userName
+                    Id = userId,
+                    Name = userName
                 };
 
                 await InvokeWSAsync(context, info, abortStatus);
@@ -58,7 +58,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         {
             try
             {
-                await WebSocketHub.WSManager.RemoveWebSocketIfExists(userInfo.UserId);
+                await WebSocketHub.WSManager.RemoveWebSocketIfExists(userInfo.Id);
                 var socket = await context.WebSockets.AcceptWebSocketAsync();
 
                 if (abortStatus == ConnectionAborted.None)
@@ -70,7 +70,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
                         if (result.MessageType == WebSocketMessageType.Binary)
                             await WebSocketHub.ReceiveMessageAsync(socket, Encoding.UTF8.GetString(buffer, 0, result.Count));
                         else
-                            await WebSocketHub.OnDisconnectedAsync(userInfo.UserId);
+                            await WebSocketHub.OnDisconnectedAsync(userInfo.Id);
                         return;
                     });
                 }

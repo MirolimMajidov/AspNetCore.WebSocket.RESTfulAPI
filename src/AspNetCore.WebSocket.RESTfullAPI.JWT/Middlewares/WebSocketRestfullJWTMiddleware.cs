@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
@@ -43,6 +42,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
                     UserName = userName
                 };
 
+                //Here you able to pass your own subclass instead of WSUserInfo. Note: If you bind your own subclass instead of WSUserInfo, all your Web Socket controllers should be use your passed subclass
                 await InvokeWSAsync(context, info, abortStatus);
             }
             catch (Exception ex)
@@ -63,6 +63,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Middlewares
         /// <returns></returns>
         public static IApplicationBuilder WebSocketRESTfullJWT(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60)
         {
+            //Here you able to bind your own subclasses instead of WebSocketRestfullMiddleware and WebSocketHub generic types. Note: If you bind your own subclass instead of WebSocketHub, all your Web Socket controllers should be use your binded subclass
             return builder.MapWebSocket<WebSocketRestfullJWTMiddleware, WebSocketHub>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize);
         }
     }

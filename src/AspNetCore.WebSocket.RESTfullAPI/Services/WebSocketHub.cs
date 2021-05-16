@@ -1,8 +1,8 @@
 ﻿using AspNetCore.WebSocket.RESTfullAPI.Configurations;
 using AspNetCore.WebSocket.RESTfullAPI.Middlewares;
 using AspNetCore.WebSocket.RESTfullAPI.Models;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +16,11 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
     public class WebSocketHub : Disposable
     {
         public readonly IWebSocketManager WSManager;
-        private readonly ILogger<WebSocketHub> _logger;
+        private readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-        public WebSocketHub(IWebSocketManager _manager, ILogger<WebSocketHub> logger)
+        public WebSocketHub(IWebSocketManager _manager)
         {
             WSManager = _manager;
-            _logger = logger;
         }
 
         /// <summary>
@@ -31,9 +30,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         /// <param name="userInfo">Current User info</param>
         public virtual async Task OnConnectedAsync(System.Net.WebSockets.WebSocket socket, WSUserInfo userInfo)
         {
-            await WSManager.AddSocket(userInfo.UserId, socket, userInfo);
+            await WSManager.AddSocket(userInfo.Id, socket, userInfo);
 
-            await SendNotificationAsync(userInfo.UserId, new { }, Notification.WSConnected);
+            await SendNotificationAsync(userInfo.Id, new { }, Notification.WSConnected);
         }
 
         /// <summary>
@@ -58,7 +57,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
                 if (socket?.State == WebSocketState.Open)
                 {
                     if (WebSocketManager.LoggAllWSRequest)
-                        logger.LogInformation($"User id: {userId}, Method: {method}, Response data: {responseMessage}");
+                        logger.Info($"User id: {userId}, Method: {method}, Response data: {responseMessage}");
 
                     var bufferContant = Encoding.UTF8.GetBytes(responseMessage);
                     var buffer = new ArraySegment<byte>(array: bufferContant, offset: 0, count: bufferContant.Length);
@@ -121,9 +120,9 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
             {
                 var requestModel = JsonConvert.DeserializeObject<WSRequestModel>(receiveMessageData);
                 var userInfo = WSManager.GetUserInfo(socket);
-                userId = userInfo?.UserId;
+                userId = userInfo?.Id;
                 if (WebSocketManager.LoggAllWSRequest)
-                    _logger.LogInformation($"User id: {userId}, Method: {requestModel.Method}, Request data: {receiveMessageData}");
+                    _logger.Info($"User id: {userId}, Method: {requestModel.Method}, Request data: {receiveMessageData}");
                 requestId = requestModel.Id;
                 requestMethod = requestModel.Method;
                 if (userInfo == null)
@@ -134,7 +133,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
                 {
                     if (string.IsNullOrEmpty(requestId) || string.IsNullOrEmpty(requestMethod))
                     {
-                        responseModel = await WSRequestModel.NotAccessAsync(errorId: 2);
+                        responseModel = await WSRequestModel.NotAccessAsync(errorId: 102);
                     }
                     else
                     {
@@ -164,25 +163,25 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
                                 }
                                 else
                                 {
-                                    responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method's parameters is invalid", 5);
+                                    responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method's parameters is invalid", 106);
                                 }
                             }
                             else
                             {
-                                responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method of {methodLevels.First()} class is invalid", 4);
+                                responseModel = await WSRequestModel.ErrorRequestAsync($"{requestMethod} method of {methodLevels.First()} class is invalid", 104);
                             }
                         }
                         else
                         {
-                            responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request will support only two levels methods", 3);
+                            responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request will support only two levels methods", 103);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Websocket request is invalid");
-                responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request is invalid", 1);
+                _logger.Error(ex, "Websocket request is invalid");
+                responseModel = await WSRequestModel.ErrorRequestAsync("Websocket request is invalid", 101);
             }
 
             if (responseModel != null)

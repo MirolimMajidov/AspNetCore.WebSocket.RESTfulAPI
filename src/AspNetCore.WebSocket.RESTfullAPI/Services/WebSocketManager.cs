@@ -1,4 +1,5 @@
 ﻿using AspNetCore.WebSocket.RESTfullAPI.Models;
+using NLog;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         public static bool LoggAllWSRequest { get; set; }
         public static int WebSocketBufferSize { get; set; }
         public static string CurrentAssemblyName { get; set; }
+
+        private readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         /// <summary/>
         /// Gets Socket from all active user list by ID
@@ -115,7 +118,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
         {
             try
             {
-                await WebSocketHub.SendNotificationAsync(socket, new { status = abortStatus }, logger: null, method: Notification.ConnectionAborted);
+                await WebSocketHub.SendNotificationAsync(socket, new { status = abortStatus }, logger: _logger, method: Notification.ConnectionAborted);
                 await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "The connection closed by the server", CancellationToken.None);
             }
             catch
@@ -133,10 +136,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI.Services
                 {
                     var description = becauseClause == null ? closeDescription : $"{closeDescription} because {becauseClause}";
 
+                    if (LoggAllWSRequest)
+                        _logger.Info($"{description}, User Id: {socketId}, Connection state: {socketInfo.WS?.State}");
+
                     if (socketInfo.WS?.State == WebSocketState.Open)
                     {
                         if (nitifyClient)
-                            await WebSocketHub.SendNotificationAsync(socketInfo.WS, new { description }, method: Notification.UserUnAuth, logger: null);
+                            await WebSocketHub.SendNotificationAsync(socketInfo.WS, new { description }, method: Notification.UserUnAuth, logger: _logger);
 
                         await socketInfo.WS.CloseOutputAsync(closeStatus, description, CancellationToken.None);
                     }

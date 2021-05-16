@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -118,7 +116,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestClient
                 {
                     if (int.TryParse(UserId.Text, out int userId))
                     {
-                        await Sending("Chat.DirectWithFriend", ("message", message), ("userId", userId.ToString()));
+                        await Sending("Chat.Message", ("message", message), ("userId", userId.ToString()));
                     }
                     else
                     {

@@ -106,7 +106,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestClient
                 {
                     if (Guid.TryParse(UserId.Text, out Guid userId))
                     {
-                        await Sending("Chat.DirectWithFriend", ("message", message), ("userId", userId.ToString()));
+                        await Sending("Chat.Message", ("message", message), ("userId", userId.ToString()));
                     }
                     else
                     {

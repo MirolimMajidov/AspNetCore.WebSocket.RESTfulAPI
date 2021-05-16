@@ -23,20 +23,20 @@ namespace AspNetCore.WebSocket.RESTfullAPI.TestServer.Hubs
             _wsUserInfo = wsUserInfo;
         }
 
-        [HttpPost("Chat.DirectWithFriend")]
-        [WSHubMethodName("Chat.DirectWithFriend")]
+        [HttpPost("Chat.Message")]
+        [WSHubMethodName("Chat.Message")]
         [SwaggerOperation(Summary = "This is only for messaging one user with own friend")]
-        [SwaggerResponse(0, "Return true when request successfully completed", typeof(string))]
+        [SwaggerResponse(0, "Return info when request successfully completed", typeof(string))]
         public async Task<WSRequestModel> DirectWithFriend([SwaggerParameter("This is must be another user's Id", Required = true)] Guid userId, [SwaggerParameter(Required = true)] string message)
         {
-            await _socketHub.SendNotificationAsync(userId, $"{_wsUserInfo.UserName} user send '{message}' message", "Chat.DirectWithFriend");
+            await _socketHub.SendNotificationAsync(userId, $"{_wsUserInfo.UserName} user send '{message}' message", "Chat.Message");
             return await WSRequestModel.SuccessAsync($"'{message}' message sended to '{userId}' user");
         }
 
         [HttpPost("Chat.MessageToAll")]
         [WSHubMethodName("Chat.MessageToAll")]
         [SwaggerOperation(Summary = "This is for sending message to all another user")]
-        [SwaggerResponse(0, "Return true when request successfully completed", typeof(bool))]
+        [SwaggerResponse(0, "Return info when request successfully completed", typeof(string))]
         public async Task<WSRequestModel> MessageToAll([SwaggerParameter(Required = true)] string message)
         {
             var allConnecttedUserIds = _socketHub.WSManager.UsersInfo().Where(id => id != _wsUserInfo.UserId).Select(v => v.UserId);

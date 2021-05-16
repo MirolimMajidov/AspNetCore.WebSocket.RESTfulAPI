@@ -2,8 +2,8 @@
 {
     public class WSUserInfo : Disposable
     {
-        public object UserId { get; set; }
+        public object Id { get; set; }
 
-        public string UserName { get; set; }
+        public string Name { get; set; }
     }
 }
