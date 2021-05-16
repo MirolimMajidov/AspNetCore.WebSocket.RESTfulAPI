@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AspNetCore.WebSocket.RESTfullAPI.TestClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="AspNetCore.WebSocket.RESTfullAPI" Height="450" Width="800">
     <StackPanel >
         <StackPanel Orientation="Horizontal">
             <TextBlock MinWidth="100px">User name:</TextBlock>

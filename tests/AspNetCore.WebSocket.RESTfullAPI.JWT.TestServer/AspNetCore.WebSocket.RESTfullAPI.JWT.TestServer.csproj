@@ -5,14 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="AspNetCore.WebSocket.RESTfullAPI.JWT" Version="1.0.0" />-->
+    <PackageReference Include="AspNetCore.WebSocket.RESTfullAPI.JWT" Version="1.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.1.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\AspNetCore.WebSocket.RESTfullAPI.JWT\AspNetCore.WebSocket.RESTfullAPI.JWT.csproj" />
   </ItemGroup>
 
 </Project>
