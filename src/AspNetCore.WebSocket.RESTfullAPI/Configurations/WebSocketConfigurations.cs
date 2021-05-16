@@ -17,6 +17,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
             services.AddScoped<WebSocketHub>();
 
             var allAssemblies = Assembly.GetEntryAssembly().GetReferencedAssemblies().Select(name => Assembly.Load(name)).ToList();
+            allAssemblies.Add(Assembly.GetEntryAssembly());
             foreach (var type in allAssemblies.SelectMany(a => a.ExportedTypes))
             {
                 if (type.BaseType == typeof(WebSocketHub))
