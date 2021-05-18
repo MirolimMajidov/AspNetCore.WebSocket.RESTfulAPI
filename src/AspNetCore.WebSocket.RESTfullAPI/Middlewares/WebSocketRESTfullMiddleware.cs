@@ -14,7 +14,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
     public class WebSocketRestfullMiddleware
     {
         protected WebSocketHub WebSocketHub { get; set; }
-        protected ILogger<WebSocketRestfullMiddleware> Logger { get; set; }
+        protected ILogger Logger { get; set; }
 
         public WebSocketRestfullMiddleware(RequestDelegate next, WebSocketHub webSocketHub, ILogger<WebSocketRestfullMiddleware> logger)
         {

@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using NLog;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +13,12 @@ namespace AspNetCore.WebSocket.RESTfullAPI
     public class WebSocketHub : Disposable
     {
         public readonly IWebSocketManager WSManager;
-        private readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger _logger;
 
-        public WebSocketHub(IWebSocketManager _manager)
+        public WebSocketHub(IWebSocketManager _manager, ILogger<WebSocketHub> logger)
         {
             WSManager = _manager;
+            _logger = logger;
         }
 
         /// <summary>
@@ -54,7 +55,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                 if (socket?.State == WebSocketState.Open)
                 {
                     if (WebSocketManager.LoggAllWSRequest)
-                        logger.Info($"User id: {userId}, Method: {method}, Response data: {responseMessage}");
+                        logger.LogInformation($"User id: {userId}, Method: {method}, Response data: {responseMessage}");
 
                     var bufferContant = Encoding.UTF8.GetBytes(responseMessage);
                     var buffer = new ArraySegment<byte>(array: bufferContant, offset: 0, count: bufferContant.Length);
@@ -119,7 +120,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                 var userInfo = WSManager.GetUserInfo(socket);
                 userId = userInfo?.Id;
                 if (WebSocketManager.LoggAllWSRequest)
-                    _logger.Info($"User id: {userId}, Method: {requestModel.Method}, Request data: {receiveMessageData}");
+                    _logger.LogInformation($"User id: {userId}, Method: {requestModel.Method}, Request data: {receiveMessageData}");
                 requestId = requestModel.Id;
                 requestMethod = requestModel.Method;
                 if (userInfo == null)
@@ -155,7 +156,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                                         }
                                         methodParams = parameters.ToArray();
                                     }
-                                    var callingClass = Activator.CreateInstance(callingController, new object[] { this, userInfo });
+                                    var callingClass = Activator.CreateInstance(callingController, new object[] { this, userInfo, _logger });
                                     responseModel = await (Task<ResponseModel>)wsHubMethod.Invoke(callingClass, methodParams);
                                 }
                                 else
@@ -177,7 +178,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Websocket request is invalid");
+                _logger.LogError(ex, "Websocket request is invalid");
                 responseModel = await ResponseModel.ErrorRequestAsync("Websocket request is invalid", 101);
             }
 

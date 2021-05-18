@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +15,12 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         public static bool LoggAllWSRequest { get; set; }
         public static int WebSocketBufferSize { get; set; }
         public static string CurrentAssemblyName { get; set; }
+        private readonly ILogger _logger;
 
-        private readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        public WebSocketManager(ILogger<WebSocketManager> logger)
+        {
+            _logger = logger;
+        }
 
         /// <summary/>
         /// Gets Socket from all active user list by ID
@@ -136,7 +140,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                     var description = becauseClause == null ? closeDescription : $"{closeDescription} because {becauseClause}";
 
                     if (LoggAllWSRequest)
-                        _logger.Info($"{description}, User Id: {socketId}, Connection state: {socketInfo.WS?.State}");
+                        _logger.LogInformation($"{description}, User Id: {socketId}, Connection state: {socketInfo.WS?.State}");
 
                     if (socketInfo.WS?.State == WebSocketState.Open)
                     {
