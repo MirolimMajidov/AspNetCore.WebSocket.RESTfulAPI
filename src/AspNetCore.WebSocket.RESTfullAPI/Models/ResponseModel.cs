@@ -19,42 +19,74 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         public object Result { get; set; }
         public bool ShouldSerializeResult() => Result != null;
 
-        public static ResponseModel ErrorRequest(string error = "error", int errorId = 999)
+        /// <summary>
+        /// Create response model for an error
+        /// </summary>
+        /// <param name="error">Message of error</param>
+        /// <param name="errorId">Id of error</param>
+        /// <returns>Created model</returns>
+        public static ResponseModel ErrorRequest(string error = "error", int errorId = 400)
         {
             return new ResponseModel() { Error = error, ErrorId = errorId };
         }
 
-        public static async Task<ResponseModel> ErrorRequestAsync(string error = "error", int errorId = 999)
+        /// <summary>
+        /// Create response model for an error
+        /// </summary>
+        /// <param name="error">Message of error</param>
+        /// <param name="errorId">Id of error</param>
+        /// <returns>Created model</returns>
+        public static async Task<ResponseModel> ErrorRequestAsync(string error = "error", int errorId = 400)
         {
             return await Task.Run(() => ErrorRequest(error, errorId));
         }
 
+        /// <summary>
+        /// Create response model for a success request
+        /// </summary>
+        /// <param name="result">Data to transfer the client</param>
+        /// <returns>Created model</returns>
         public static ResponseModel SuccessRequest(object result = null)
         {
             if (result == null) result = new { };
             return new ResponseModel() { Result = result };
         }
 
+        /// <summary>
+        /// Create response model for a success request
+        /// </summary>
+        /// <param name="result">Data to transfer the client</param>
+        /// <returns>Created model</returns>
         public static async Task<ResponseModel> SuccessRequestAsync(object result = null)
         {
             return await Task.Run(() => SuccessRequest(result));
         }
 
-        public static async Task<ResponseModel> NotFoundAsync(string error = "Not found", int errorId = 404)
-        {
-            return await ErrorRequestAsync(error, errorId);
-        }
-
-        public static ResponseModel NotAccess(int errorId = 10)
+        /// <summary>
+        /// Create response model for NoAccess error. Massage of error will be "You haven't access to API!"
+        /// </summary>
+        /// <param name="errorId">Id of error</param>
+        /// <returns>Created model</returns>
+        public static ResponseModel NoAccess(int errorId = 401)
         {
             return ErrorRequest("You haven't access to API!", errorId);
         }
 
-        public static async Task<ResponseModel> NotAccessAsync(int errorId = 10)
+        /// <summary>
+        /// Create response model for NoAccess error. Massage of error will be "You haven't access to API!"
+        /// </summary>
+        /// <param name="errorId">Id of error</param>
+        /// <returns>Created model</returns>
+        public static async Task<ResponseModel> NoAccessAsync(int errorId = 401)
         {
-            return await Task.Run(() => NotAccess(errorId));
+            return await Task.Run(() => NoAccess(errorId));
         }
 
+        /// <summary>
+        /// Serialize any object to string
+        /// </summary>
+        /// <param name="textJson">Object for serializing</param>
+        /// <returns>Serialized string value</returns>
         public static string GenerateJson(object textJson)
         {
             return JsonConvert.SerializeObject(textJson, Formatting.Indented, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore, ContractResolver = new CamelCasePropertyNamesContractResolver() });
@@ -63,6 +95,10 @@ namespace AspNetCore.WebSocket.RESTfullAPI
 
     public static class RequestModelExtensions
     {
+        /// <summary>
+        /// Serialize current object to string
+        /// </summary>
+        /// <returns>Serialized string value</returns>
         public static string GenerateJson(this ResponseModel requestModel)
         {
             return ResponseModel.GenerateJson(requestModel);

@@ -13,11 +13,11 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <Version>1.1.6</Version>
+    <Version>1.1.7</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.WebSocket.RESTfullAPI" Version="1.1.9" />
+    <PackageReference Include="AspNetCore.WebSocket.RESTfullAPI" Version="1.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.6" />
   </ItemGroup>
 

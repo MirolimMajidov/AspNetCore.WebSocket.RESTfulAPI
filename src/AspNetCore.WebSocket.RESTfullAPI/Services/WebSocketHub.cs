@@ -125,13 +125,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                 requestMethod = requestModel.Method;
                 if (userInfo == null)
                 {
-                    responseModel = await ResponseModel.NotAccessAsync(errorId: 105);
+                    responseModel = await ResponseModel.NoAccessAsync(errorId: 105);
                 }
                 else
                 {
                     if (string.IsNullOrEmpty(requestId) || string.IsNullOrEmpty(requestMethod))
                     {
-                        responseModel = await ResponseModel.NotAccessAsync(errorId: 102);
+                        responseModel = await ResponseModel.NoAccessAsync(errorId: 102);
                     }
                     else
                     {

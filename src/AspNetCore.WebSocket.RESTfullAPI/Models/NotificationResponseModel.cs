@@ -17,11 +17,22 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         public object Data { get; set; }
         public bool ShouldSerializeData() => Data != null;
 
-        public static ResponseModel CanNotGetAccessToWS(int errorId = 7)
+        /// <summary>
+        /// Create response model for NoAccess to WS an error. Massage of error will be "You cannot get access to Websocket!!!"
+        /// </summary>
+        /// <param name="errorId">Id of error</param>
+        /// <returns>Created model</returns>
+        public static ResponseModel NoAccessToWS(int errorId = 7)
         {
-            return ErrorRequest("You can't get access to Websocket!!!", errorId);
+            return ErrorRequest("You cannot get access to Websocket!!!", errorId);
         }
 
+        /// <summary>
+        /// This is only to create response model for sending notification to the client
+        /// </summary>
+        /// <param name="result">Data to transfer the client</param>
+        /// <param name="method">Receive method name for sending notification to the client</param>
+        /// <returns>Created model</returns>
         public static NotificationResponseModel SendNotification(object result, string method)
         {
             return new NotificationResponseModel() { Data = result, Method = method };
