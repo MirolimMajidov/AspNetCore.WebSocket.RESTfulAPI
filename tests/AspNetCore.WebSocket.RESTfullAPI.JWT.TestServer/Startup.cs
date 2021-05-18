@@ -40,7 +40,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer
                     Description = "The server will return some error codes before starting the WebSocket APIs: " +
                     "101) The problem on excuting Websocket's request; " +
                     "102) Request's Id or method is empty; " +
-                    "103) Websocket request will support only one or two levels methods; " +
+                    "103) Websocket request will support only two levels methods; " +
                     "104) Sended method's class is invalid; " +
                     "105) The user doesn't exist with sended WS data; " +
                     "106) Sended method's parameters is invalid; ",

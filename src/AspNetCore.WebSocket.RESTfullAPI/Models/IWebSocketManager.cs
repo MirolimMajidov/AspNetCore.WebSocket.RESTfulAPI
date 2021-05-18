@@ -25,7 +25,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// Gets all active user WebSockets list
         /// </summary>
         /// <returns>List of WebSockets</returns>
-        public ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> Clients();
+        public ConcurrentDictionary<string, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> Clients();
 
         /// <summary>
         /// Gets all active user info of clients

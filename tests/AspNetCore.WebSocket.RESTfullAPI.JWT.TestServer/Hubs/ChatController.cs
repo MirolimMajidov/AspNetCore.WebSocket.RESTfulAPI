@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,11 +14,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Hubs
     {
         private readonly WSHub _socketHub;
         private readonly WSUserInfo _wsUserInfo;
+        private readonly ILogger _logger;
 
-        public ChatController(WSHub socketHub, WSUserInfo wsUserInfo)
+        public ChatController(WSHub socketHub, WSUserInfo wsUserInfo, ILogger logger)
         {
             _socketHub = socketHub;
             _wsUserInfo = wsUserInfo;
+            _logger = logger;
         }
 
         [HttpPost("Chat.Message")]

@@ -10,7 +10,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public class WebSocketManager : Disposable, IWebSocketManager
     {
-        private readonly ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> sockets = new ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)>();
+        private readonly ConcurrentDictionary<string, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> sockets = new ConcurrentDictionary<string, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)>();
 
         public static bool LoggAllWSRequest { get; set; }
         public static int WebSocketBufferSize { get; set; }
@@ -29,7 +29,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// <returns>Socket</returns>
         public System.Net.WebSockets.WebSocket GetWebSocket(object socketId)
         {
-            return sockets.FirstOrDefault(p => p.Key == socketId).Value.WS;
+            return sockets.FirstOrDefault(p => p.Key == socketId.ToString()).Value.WS;
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// Gets all active user WebSockets list
         /// </summary>
         /// <returns>List of WebSockets</returns>
-        public ConcurrentDictionary<object, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> Clients()
+        public ConcurrentDictionary<string, (System.Net.WebSockets.WebSocket WS, WSUserInfo Info)> Clients()
         {
             return sockets;
         }
@@ -86,7 +86,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// <param name="socketId">Adding WebSocket's Id</param>
         public async Task AddSocket(object socketId, System.Net.WebSockets.WebSocket socket, WSUserInfo Info)
         {
-            await Task.Run(() => { sockets.TryAdd(socketId, (socket, Info)); });
+            await Task.Run(() => { sockets.TryAdd(socketId.ToString(), (socket, Info)); });
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// <returns>Socket</returns>
         public async Task RemoveWebSocketIfExists(object socketId)
         {
-            if (sockets.ContainsKey(socketId))
+            if (sockets.ContainsKey(socketId.ToString()))
                 await RemoveSocket(socketId, "WebSocket reconnecting", nitifyClient: false);
         }
 
@@ -133,7 +133,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// </summary>
         public async Task RemoveSocket(object socketId, string closeDescription = "The connection closed by the server", string becauseClause = null, WebSocketCloseStatus closeStatus = WebSocketCloseStatus.NormalClosure, bool nitifyClient = true)
         {
-            if (sockets.TryRemove(socketId, out (System.Net.WebSockets.WebSocket WS, WSUserInfo Info) socketInfo))
+            if (sockets.TryRemove(socketId.ToString(), out (System.Net.WebSockets.WebSocket WS, WSUserInfo Info) socketInfo))
             {
                 try
                 {

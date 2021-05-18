@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Threading.Tasks;
 
@@ -12,11 +13,13 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Hubs
     {
         private readonly WSHub _socketHub;
         private readonly WSUserInfo _wsUserInfo;
+        private readonly ILogger _logger;
 
-        public UserController(WSHub socketHub, WSUserInfo wsUserInfo)
+        public UserController(WSHub socketHub, WSUserInfo wsUserInfo, ILogger logger)
         {
             _socketHub = socketHub;
             _wsUserInfo = wsUserInfo;
+            _logger = logger;
         }
 
         [HttpGet("User.Info")]

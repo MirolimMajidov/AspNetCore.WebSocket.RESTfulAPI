@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace AspNetCore.WebSocket.RESTfullAPI.JWT
 {
     public class WSHub : WebSocketHub
     {
-        public WSHub(IWebSocketManager _manager) : base(_manager) { }
+        public WSHub(IWebSocketManager _manager, ILogger<WSHub> logger) : base(_manager, logger) { }
 
         /// <summary>
         /// To connect new created WebSocket to the WebSocketManager's sockets list
