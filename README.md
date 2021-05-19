@@ -39,14 +39,40 @@ Add the WebSocket's classes to the services in the ConfigureServices method of t
 ```
 services.AddWebSocketManager();
 ```
-Add the WebSocketRESTfullAPI middleware in the Configure method of the Startup class:
+Add the `WebSocketRESTfullAPI` middleware in the Configure method of the Startup class:
 ```
 app.WebSocketRESTfullAPI("/WSMessenger", receiveBufferSize: 5, keepAliveInterval: 30, loggAllWebSocketRequestAndResponse: false);
 ```
-The following settings can be configured by passing to parameters of WebSocketRESTfullAPI method:
-Path - Path to bind Web socket to listen client. Here path is "WSMessenger" and client should cannect to this path "ws://{BaseSiteURL}/WSMessenger".
-ReceiveBufferSize - Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb. Passing this parameter is nor required.
-KeepAliveInterval - Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds. Passing this parameter is nor required.
-LoggAllWebSocketRequestAndResponse - When you turn on it all request and response data of web socket will be logged to the your configurated file. By default it's false because it can be effect to performance.
+The following settings can be configured by passing to parameters of WebSocketRESTfullAPI method: <br/>
+`Path` - Path to bind Web socket to listen client. Here path is "WSMessenger" and client should cannect to this path "ws://{BaseSiteURL}/WSMessenger". <br/>
+`ReceiveBufferSize` - Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb. Passing this parameter is nor required. <br/>
+`KeepAliveInterval` - Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds. Passing this parameter is nor required. <br/>
+`LoggAllWebSocketRequestAndResponse` - When you turn on it all request and response data of web socket will be logged to the your configurated file. By default it's false because it can be effect to performance. <br/>
 
+All configuration is done. Now, you able to create your own Web Socket controllers with APIs.<br/> 
+
+First you need to create a new folder which name `Hubs` on project and create new controller for Web socket APIs.
+
+Example code:
+```
+public class ChatController
+{
+    private readonly WebSocketHub _socketHub;
+    private readonly WSUserInfo _wsUserInfo;
+    private readonly ILogger _logger;
+
+    public ChatController(WebSocketHub socketHub, WSUserInfo wsUserInfo, ILogger logger)
+    {
+        _socketHub = socketHub;
+        _wsUserInfo = wsUserInfo;
+        _logger = logger;
+    }
+
+    //Your APIs  
+}
+```
+ The controller name must be start from `{NameController}Controller` and it should have constructor parameters for `WebSocketHub`, `WSUserInfo` and `ILogger`: <br/>
+`WebSocketHub` - This is will be use for sending data by notification to another needed users or for getting acces to the WebSocketManager to get all active client with users data. It can be sub class of WebSocketHub if you want to override (See example from AspNetCore.WebSocket.RESTfullAPI.JWT project to override).<br/>
+`WSUserInfo` - To get needed user info which we attach on creating Web socket. It can be sub class of WSUserInfo if you want to override user data and add some other user information to this parameter (See example from AspNetCore.WebSocket.RESTfullAPI.JWT project to create sub class and to use it).<br/>
+`ILogger` - This is just for adding logg if it's needed.
 
