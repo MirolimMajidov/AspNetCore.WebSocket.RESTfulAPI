@@ -17,13 +17,13 @@ AspNetCore.WebSocket.RESTfullAPI is a communication library with Web Socket like
         <td align="center">1.</td>
         <td> <a href="https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfullAPI">AspNetCore.WebSocket.RESTfullAPI</a></td>
         <td>This for implementing and using Web Socket on ASP.Net Core to create real-time communication app for building chat, game or other.</td>
-        <td> <a href="https://..">View</a> </td>
+        <td> <a href="https://app.swaggerhub.com/apis-docs/mirolimjon/AspNetCore.WebSocket.RESTfullAPI/1.0.0">View</a> </td>
     </tr>
     <tr>
         <td align="center">2.</td>
         <td> <a href="https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfullAPI.JWT/">AspNetCore.WebSocket.RESTfullAPI.JWT</a></td>
         <td>This library also for creating real-time communication app like AspNetCore.WebSocket.RESTfullAPI, but it is customized for using authorized user by JSON Web Token (JWT)</td>
-        <td> <a href="https://..">View</a> </td>
+        <td> <a href="https://app.swaggerhub.com/apis-docs/mirolimjon/AspNetCore.WebSocket.RESTfullAPI/1.0.0">View</a> </td>
     </tr>
   </tbody>  
 </table>
