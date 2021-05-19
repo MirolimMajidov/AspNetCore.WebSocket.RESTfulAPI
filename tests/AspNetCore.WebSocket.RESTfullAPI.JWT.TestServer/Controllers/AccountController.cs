@@ -27,7 +27,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer.Controllers
         public async Task<ResponseModel> Authorization([FromForm, SwaggerParameter("Name of user", Required = true)] string userName, [FromForm, SwaggerParameter("Id of user", Required = true)] int userId)
         {
             if (string.IsNullOrEmpty(userName) || userId == 0)
-                return await ResponseModel.NotAccessAsync();
+                return await ResponseModel.NoAccessAsync();
 
             var token = await GenerateToken(userName, userId);
             return await ResponseModel.SuccessRequestAsync(token);
