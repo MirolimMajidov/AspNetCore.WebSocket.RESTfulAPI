@@ -27,3 +27,26 @@ AspNetCore.WebSocket.RESTfullAPI is a communication library with Web Socket like
     </tr>
   </tbody>  
 </table>
+
+## Getting Started
+
+Make sure you have configured [Web Sockets for IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/websocket) in your machine. After that, you need to instal AspNetCore.WebSocket.RESTfullAPI NuGet.
+
+```powershell
+Install-Package AspNetCore.WebSocket.RESTfullAPI
+```
+Add the WebSocket's classes to the services in the ConfigureServices method of the Startup class:
+```
+services.AddWebSocketManager();
+```
+Add the WebSocketRESTfullAPI middleware in the Configure method of the Startup class:
+```
+app.WebSocketRESTfullAPI("/WSMessenger", receiveBufferSize: 5, keepAliveInterval: 30, loggAllWebSocketRequestAndResponse: false);
+```
+The following settings can be configured by passing to parameters of WebSocketRESTfullAPI method:
+Path - Path to bind Web socket to listen client. Here path is "WSMessenger" and client should cannect to this path "ws://{BaseSiteURL}/WSMessenger".
+ReceiveBufferSize - Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb. Passing this parameter is nor required.
+KeepAliveInterval - Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds. Passing this parameter is nor required.
+LoggAllWebSocketRequestAndResponse - When you turn on it all request and response data of web socket will be logged to the your configurated file. By default it's false because it can be effect to performance.
+
+
