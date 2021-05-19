@@ -22,7 +22,6 @@ namespace AspNetCore.WebSocket.RESTfullAPI.JWT.TestServer
         {
             services.AddAuthentications();
             services.AddWebSocketManager();
-            //services.AddScoped<WSHub>();
 
             #region API Documents
 
