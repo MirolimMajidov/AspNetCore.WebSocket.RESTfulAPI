@@ -28,7 +28,8 @@ AspNetCore.WebSocket.RESTfullAPI is a communication library with Web Socket like
   </tbody>  
 </table>
 
-## Getting Started
+# Getting Started
+## Setup the server
 
 Make sure you have configured [Web Sockets for IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/websocket) in your machine. After that, you need to instal AspNetCore.WebSocket.RESTfullAPI NuGet.
 
@@ -76,3 +77,16 @@ public class ChatController
 `WSUserInfo` - To get needed user info which we attach on creating Web socket. It can be sub class of WSUserInfo if you want to override user data and add some other user information to this parameter (See example from AspNetCore.WebSocket.RESTfullAPI.JWT project to create sub class and to use it).<br/>
 `ILogger` - This is just for adding logg if it's needed.
 
+Example to create API:
+```
+[WSHubMethodName("Chat.Message")]
+public async Task<ResponseModel> MessageWithFriend(Guid userId, string message)
+{
+    await _socketHub.SendNotificationAsync(userId, $"{_wsUserInfo.Name} user send '{message}' message", "Chat.Message");
+    return await ResponseModel.SuccessRequestAsync($"'{message}' message sended to '{userId}' user");
+}
+```
+
+Here `WSHubMethodName` to pass full name of API. First one must be controller name and last one must be API name, and both of them should be pass with `.`. The parameters of method should be different dependent of your logic and each parameter can be optional.<br/>
+The method of response type must be `ResponseModel`. ResponseModel class has some needed helper method to reponse just by passing needed data to `SuccessRequestAsync` method or `NoAccessAsync` to return error.<br/>
+By using `SendNotificationAsync` method of WebSocketHub, you be able to send data by notification to the another user. It will accept UserId, list of UserId or WebSocket connection to send notification.
