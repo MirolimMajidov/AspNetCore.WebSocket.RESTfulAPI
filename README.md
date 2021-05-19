@@ -28,8 +28,9 @@ AspNetCore.WebSocket.RESTfullAPI is a communication library with Web Socket like
   </tbody>  
 </table>
 
-# Getting Started
-## Setup the server
+
+## Getting Started
+### Setup the server
 
 Make sure you have configured [Web Sockets for IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/websocket) in your machine. After that, you need to instal AspNetCore.WebSocket.RESTfullAPI NuGet.
 
@@ -42,9 +43,9 @@ services.AddWebSocketManager();
 ```
 Add the `WebSocketRESTfullAPI` middleware in the Configure method of the Startup class:
 ```
-app.WebSocketRESTfullAPI("/WSMessenger", receiveBufferSize: 5, keepAliveInterval: 30, loggAllWebSocketRequestAndResponse: false);
+app.WebSocketRESTfullAPI("/WSMessenger");
 ```
-The following settings can be configured by passing to parameters of WebSocketRESTfullAPI method: <br/>
+You can configured the Web socket by passing data to needed parameters of WebSocketRESTfullAPI method: <br/>
 `Path` - Path to bind Web socket to listen client. Here path is "WSMessenger" and client should cannect to this path "ws://{BaseSiteURL}/WSMessenger". <br/>
 `ReceiveBufferSize` - Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb. Passing this parameter is nor required. <br/>
 `KeepAliveInterval` - Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds. Passing this parameter is nor required. <br/>
@@ -91,10 +92,14 @@ Here `WSHubMethodName` to pass full name of API. First one must be controller na
 The method of response type must be `ResponseModel`. ResponseModel class has some needed helper method to reponse just by passing needed data to `SuccessRequestAsync` method or `NoAccessAsync` to return error.<br/>
 By using `SendNotificationAsync` method of WebSocketHub, you be able to send data by notification to the another user. It will accept UserId, list of UserId or WebSocket connection to send notification.
 
-## Setup the client
+### Setup the client
 All configurations of client same other Web Socket client connection except Headers, becasue Headers of client must have information for `UserName` and `UserId`:<br/>
 `UserName` - Header's value can be anything.<br/>
 `UserId` - Header's value can be anything (Guid, Integer, String ...), but it must be unique.
 
-## Result
 
+## Result
+You can find example for both NuGets from [Test folder](https://github.com/MirolimMajidov/WebSocket.RESTfullAPI/tree/master/tests)<br/>
+
+## Override
+See example from [AspNetCore.WebSocket.RESTfullAPI.JWT](https://github.com/MirolimMajidov/WebSocket.RESTfullAPI/tree/master/src/AspNetCore.WebSocket.RESTfullAPI.JWT) project to override AspNetCore.WebSocket.RESTfullAPI's some classes and methods and events like `OnConnectedAsync`, `OnDisconnectedAsync` and other.
