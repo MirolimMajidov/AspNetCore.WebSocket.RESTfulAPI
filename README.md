@@ -90,3 +90,11 @@ public async Task<ResponseModel> MessageWithFriend(Guid userId, string message)
 Here `WSHubMethodName` to pass full name of API. First one must be controller name and last one must be API name, and both of them should be pass with `.`. The parameters of method should be different dependent of your logic and each parameter can be optional.<br/>
 The method of response type must be `ResponseModel`. ResponseModel class has some needed helper method to reponse just by passing needed data to `SuccessRequestAsync` method or `NoAccessAsync` to return error.<br/>
 By using `SendNotificationAsync` method of WebSocketHub, you be able to send data by notification to the another user. It will accept UserId, list of UserId or WebSocket connection to send notification.
+
+## Setup the client
+All configurations of client same other Web Socket client connection except Headers, becasue Headers of client must have information for `UserName` and `UserId`:<br/>
+`UserName` - Header's value can be anything.<br/>
+`UserId` - Header's value can be anything (Guid, Integer, String ...), but it must be unique.
+
+## Result
+
