@@ -95,7 +95,7 @@ Also, you able to use `SwaggerDoc` on Web Socket controller and APIs.
 
 ### Setup the client
 All configurations of client same other Web Socket client connection except Headers, becasue Headers of client must have information for `UserName` and `UserId`:<br/>
-`UserName` - Header's value can be anything.<br/>
+`UserName` - Header's value should be string.<br/>
 `UserId` - Header's value can be anything (Guid, Integer, String ...), but it must be unique.
 
 
