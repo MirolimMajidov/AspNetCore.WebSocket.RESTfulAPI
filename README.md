@@ -108,4 +108,4 @@ See example from [AspNetCore.WebSocket.RESTfullAPI.JWT](https://github.com/Mirol
 
 ## Support
 Did you like this NuGet package? If it's helpful for you, supporting by buying me a coffee.<br/>
-<a href="https://www.buymeacoffee.com/MirolimMajidov" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="max-width: 163px;"></a>
+<a href="https://www.buymeacoffee.com/MirolimMajidov" target="_blank" style="max-width: 170px;"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="max-width: 163px;"></a>
