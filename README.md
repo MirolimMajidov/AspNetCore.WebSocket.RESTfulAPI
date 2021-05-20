@@ -107,5 +107,6 @@ You can find example for both NuGets from [Test folder](https://github.com/Mirol
 See example from [AspNetCore.WebSocket.RESTfullAPI.JWT](https://github.com/MirolimMajidov/WebSocket.RESTfullAPI/tree/master/src/AspNetCore.WebSocket.RESTfullAPI.JWT) project to override AspNetCore.WebSocket.RESTfullAPI's some classes and methods and events like `OnConnectedAsync`, `OnDisconnectedAsync` and other.
 
 ## Support
-Did you like this NuGet package? If it's helpful for you, supporting by buying me a coffee.<br/>
-<a href="https://www.buymeacoffee.com/MirolimMajidov" target="_blank" style="max-width: 170px;"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="max-width: 163px;"></a>
+Did you like this NuGet package? If it's helpful for you, supporting by buying me a coffee.
+
+<a href="https://www.buymeacoffee.com/MirolimMajidov" target="_blank" style="max-width: 170px;"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="max-width: 163px;"/></a>
