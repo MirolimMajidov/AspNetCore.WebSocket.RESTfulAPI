@@ -94,7 +94,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
             }
             catch
             {
-                await WebSocketHub.OnDisconnectedAsync(WebSocketHub.WSManager.GetId(socket));
+                await WebSocketHub.OnDisconnectedAsync(WebSocketHub.WSManager?.GetId(socket));
             }
         }
     }

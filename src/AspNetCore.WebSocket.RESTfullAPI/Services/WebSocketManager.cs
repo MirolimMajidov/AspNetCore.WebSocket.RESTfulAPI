@@ -133,13 +133,15 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// </summary>
         public async Task RemoveSocket(object socketId, string closeDescription = "The connection closed by the server", string becauseClause = null, WebSocketCloseStatus closeStatus = WebSocketCloseStatus.NormalClosure, bool nitifyClient = true)
         {
+            if (this == null || socketId == null) return;
+
             if (sockets.TryRemove(socketId.ToString(), out (System.Net.WebSockets.WebSocket WS, WSUserInfo Info) socketInfo))
             {
                 try
                 {
                     var description = becauseClause == null ? closeDescription : $"{closeDescription} because {becauseClause}";
 
-                    if (LoggAllWSRequest)
+                    if (LoggAllWSRequest && _logger != null)
                         _logger.LogInformation($"{description}, User Id: {socketId}, Connection state: {socketInfo.WS?.State}");
 
                     if (socketInfo.WS?.State == WebSocketState.Open)
@@ -155,7 +157,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                 { }
                 finally
                 {
-                    socketInfo.Info.Dispose();
+                    socketInfo.Info?.Dispose();
                 }
             }
         }

@@ -40,7 +40,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// <returns></returns>
         public virtual async Task OnDisconnectedAsync(object socketId)
         {
-            await WSManager.RemoveSocket(socketId, closeDescription: "The connection closed by the client", nitifyClient: false);
+            await WSManager?.RemoveSocket(socketId, closeDescription: "The connection closed by the client", nitifyClient: false);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
             {
                 if (socket?.State == WebSocketState.Open)
                 {
-                    if (WebSocketManager.LoggAllWSRequest)
+                    if (WebSocketManager.LoggAllWSRequest && logger != null)
                         logger.LogInformation($"User id: {userId}, Method: {method}, Response data: {responseMessage}");
 
                     var bufferContant = Encoding.UTF8.GetBytes(responseMessage);
