@@ -1,6 +1,6 @@
 # AspNetCore.WebSocket.RESTfullAPI 
 
-AspNetCore.WebSocket.RESTfullAPI is a communication library with Web Socket like RESTfull API on ASP.NET Core applications. It is easy to set up, and runs on all recent .NET, .NET Framework and .NET Standard platforms. It's used in apps that benefit from fast, real-time communication, such as chat, dashboard, and game applications.
+AspNetCore.WebSocket.RESTfullAPI - is a communication library with Web Socket like RESTfull API on ASP.NET Core applications. It is easy to set up, and runs on all recent .NET, .NET Framework and .NET Standard platforms. It's used in apps that benefit from fast, real-time communication, such as chat, dashboard, and game applications.
 
 
 ## List of NuGet packages
@@ -17,13 +17,13 @@ AspNetCore.WebSocket.RESTfullAPI is a communication library with Web Socket like
         <td align="center">1.</td>
         <td> <a href="https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfullAPI">AspNetCore.WebSocket.RESTfullAPI</a></td>
         <td>This for implementing and using Web Socket on ASP.Net Core to create real-time communication app for building chat, game or other.</td>
-        <td> <a href="https://..">View</a> </td>
+        <td> <a href="https://app.swaggerhub.com/apis-docs/mirolimjon/AspNetCore.WebSocket.RESTfullAPI/1.0.0">View</a> </td>
     </tr>
     <tr>
         <td align="center">2.</td>
         <td> <a href="https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfullAPI.JWT/">AspNetCore.WebSocket.RESTfullAPI.JWT</a></td>
         <td>This library also for creating real-time communication app like AspNetCore.WebSocket.RESTfullAPI, but it is customized for using authorized user by JSON Web Token (JWT)</td>
-        <td> <a href="https://..">View</a> </td>
+        <td> <a href="https://app.swaggerhub.com/apis-docs/mirolimjon/AspNetCore.WebSocket.RESTfullAPI/1.0.0">View</a> </td>
     </tr>
   </tbody>  
 </table>
@@ -90,16 +90,23 @@ public async Task<ResponseModel> MessageWithFriend(Guid userId, string message)
 
 Here `WSHubMethodName` to pass full name of API. First one must be controller name and last one must be API name, and both of them should be pass with `.`. The parameters of method should be different dependent of your logic and each parameter can be optional.<br/>
 The method of response type must be `ResponseModel`. ResponseModel class has some needed helper method to reponse just by passing needed data to `SuccessRequestAsync` method or `NoAccessAsync` to return error.<br/>
-By using `SendNotificationAsync` method of WebSocketHub, you be able to send data by notification to the another user. It will accept UserId, list of UserId or WebSocket connection to send notification.
+By using `SendNotificationAsync` method of WebSocketHub, you be able to send data by notification to the another user. It will accept UserId, list of UserId or WebSocket connection to send notification.<br/>
+Also, you able to use `SwaggerDoc` on Web Socket controller and APIs.
 
 ### Setup the client
 All configurations of client same other Web Socket client connection except Headers, becasue Headers of client must have information for `UserName` and `UserId`:<br/>
-`UserName` - Header's value can be anything.<br/>
+`UserName` - Header's value should be string.<br/>
 `UserId` - Header's value can be anything (Guid, Integer, String ...), but it must be unique.
 
 
 ## Result
 You can find example for both NuGets from [Test folder](https://github.com/MirolimMajidov/WebSocket.RESTfullAPI/tree/master/tests)<br/>
+<center><img src="img/ClientOfWebSocketRESTfull.png"/></center>
 
 ## Override
 See example from [AspNetCore.WebSocket.RESTfullAPI.JWT](https://github.com/MirolimMajidov/WebSocket.RESTfullAPI/tree/master/src/AspNetCore.WebSocket.RESTfullAPI.JWT) project to override AspNetCore.WebSocket.RESTfullAPI's some classes and methods and events like `OnConnectedAsync`, `OnDisconnectedAsync` and other.
+
+## Support
+Did you like this NuGet package? If it's helpful for you, supporting by buying me a coffee.
+
+<a href="https://www.buymeacoffee.com/MirolimMajidov" target="_blank" style="max-width: 170px;"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="max-width: 163px;"/></a>
