@@ -7,6 +7,8 @@ namespace AspNetCore.WebSocket.RESTfullAPI
 {
     public interface IWebSocketManager
     {
+        public List<WSController> Controllers { get; set; }
+
         /// <summary>
         /// Gets Socket from all active user list by ID
         /// </summary>

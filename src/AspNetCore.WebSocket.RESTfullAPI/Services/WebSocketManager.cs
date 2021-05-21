@@ -14,7 +14,8 @@ namespace AspNetCore.WebSocket.RESTfullAPI
 
         public static bool LoggAllWSRequest { get; set; }
         public static int WebSocketBufferSize { get; set; }
-        public static string CurrentAssemblyName { get; set; }
+        public List<WSController> Controllers { get; set; } = new List<WSController>();
+
         private readonly ILogger _logger;
 
         public WebSocketManager(ILogger<WebSocketManager> logger)
@@ -133,7 +134,7 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         /// </summary>
         public async Task RemoveSocket(object socketId, string closeDescription = "The connection closed by the server", string becauseClause = null, WebSocketCloseStatus closeStatus = WebSocketCloseStatus.NormalClosure, bool nitifyClient = true)
         {
-            if (this == null || socketId == null) return;
+            if (socketId == null || this == null) return;
 
             if (sockets.TryRemove(socketId.ToString(), out (System.Net.WebSockets.WebSocket WS, WSUserInfo Info) socketInfo))
             {

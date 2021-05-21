@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text;
@@ -111,15 +112,40 @@ namespace AspNetCore.WebSocket.RESTfullAPI
         public static IApplicationBuilder MapWebSocket<TMiddleware, TWebSocketHub>(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60, bool loggAllWebSocketRequestAndResponse = false) where TMiddleware : WebSocketRestfullMiddleware where TWebSocketHub : WebSocketHub
         {
             WebSocketManager.LoggAllWSRequest = loggAllWebSocketRequestAndResponse;
-            WebSocketManager.CurrentAssemblyName = Assembly.GetEntryAssembly().FullName;
             WebSocketManager.WebSocketBufferSize = 1024 * receiveBufferSize;
             builder.UseWebSockets(new WebSocketOptions() { KeepAliveInterval = TimeSpan.FromSeconds(keepAliveInterval) });
 
             var serviceScopeFactory = builder.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
             var serviceProvider = serviceScopeFactory.CreateScope().ServiceProvider;
+            var WSHub = serviceProvider.GetService<TWebSocketHub>();
 
+            var assembly = Assembly.GetEntryAssembly();
+            var assemblyName = assembly.GetName().Name;
+            var controllers = assembly.ExportedTypes.Where(c => c.FullName.StartsWith($"{assemblyName}.Hubs.") && c.FullName.EndsWith("Controller")).ToList();
+            foreach (var controller in controllers)
+                CreateController(controller);
 
             return builder.Map(path, (_app) => _app.UseMiddleware<TMiddleware>(serviceProvider.GetService<TWebSocketHub>()));
+
+            void CreateController(Type controller)
+            {
+                var WSController = new WSController() { Name = controller.Name[0..^10], Controller = controller };
+                var methods = controller.GetMethods().Where(m => m.GetWSHubAttribute() != null);
+                foreach (var method in methods)
+                    CreateMethod(WSController, method);
+
+
+                WSHub.WSManager.Controllers.Add(WSController);
+            }
+
+            void CreateMethod(WSController controller, MethodInfo method)
+            {
+                var wsMethod = new WSMethod() { Name = method.GetWSHubAttribute().Name, Method = method };
+                foreach (var parameter in method.GetParameters())
+                    wsMethod.Parameters.Add(parameter);
+
+                controller.Methods.Add(wsMethod);
+            }
         }
 
         /// <summary>

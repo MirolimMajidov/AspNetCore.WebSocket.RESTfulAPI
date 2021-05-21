@@ -138,26 +138,26 @@ namespace AspNetCore.WebSocket.RESTfullAPI
                         var methodLevels = requestMethod.Split('.');
                         if (methodLevels.Length == 2)
                         {
-                            Type callingController = Type.GetType($"{WebSocketManager.CurrentAssemblyName.Split(',').First()}.Hubs.{methodLevels.First()}Controller, {WebSocketManager.CurrentAssemblyName}");
-                            if (callingController != null)
+                            var controller = WSManager.Controllers.FirstOrDefault(c => c.Name == methodLevels.First());
+                            if (controller != null)
                             {
-                                var wsHubMethod = callingController.GetMethods().FirstOrDefault(m => m.GetWSHubAttribute()?.Name == requestModel.Method);
-                                var paramsLength = requestModel.Params?.Count ?? 0;
+                                var wsHubMethod = controller.Methods.FirstOrDefault(m => m.Name == requestModel.Method);
                                 if (wsHubMethod != null)
                                 {
+                                    var paramsLength = requestModel.Params?.Count ?? 0;
                                     object[] methodParams = null;
                                     if (paramsLength >= 0)
                                     {
                                         var parameters = new List<object>();
-                                        foreach (var parameter in wsHubMethod.GetParameters())
+                                        foreach (var parameter in wsHubMethod.Parameters)
                                         {
                                             var value = requestModel.Params.ContainsKey(parameter.Name) ? requestModel.Params[parameter.Name].ConvertTo(parameter.ParameterType) : parameter.DefaultValue;
                                             parameters.Add(value);
                                         }
                                         methodParams = parameters.ToArray();
                                     }
-                                    var callingClass = Activator.CreateInstance(callingController, new object[] { this, userInfo, _logger });
-                                    responseModel = await (Task<ResponseModel>)wsHubMethod.Invoke(callingClass, methodParams);
+                                    var callingClass = Activator.CreateInstance(controller.Controller, new object[] { this, userInfo, _logger });
+                                    responseModel = await (Task<ResponseModel>)wsHubMethod.Method.Invoke(callingClass, methodParams);
                                 }
                                 else
                                 {
