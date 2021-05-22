@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.JWT
 {
-    public class WebSocketRestfullJWTMiddleware : WebSocketRestfullMiddleware
+    public class WebSocketRestfuJWTMiddleware : WebSocketRESTfulMiddleware
     {
-        public WebSocketRestfullJWTMiddleware(RequestDelegate next, WSHub webSocketHub, ILogger<WebSocketRestfullJWTMiddleware> logger) : base(next, webSocketHub, logger)
+        public WebSocketRestfuJWTMiddleware(RequestDelegate next, WSHub webSocketHub, ILogger<WebSocketRestfuJWTMiddleware> logger) : base(next, webSocketHub, logger)
         {
         }
 
@@ -64,7 +64,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT
         public static IApplicationBuilder WebSocketRESTfullJWT(this IApplicationBuilder builder, PathString path, int receiveBufferSize = 4, int keepAliveInterval = 60, bool loggAllWebSocketRequestAndResponse = false)
         {
             //Here you able to bind your own subclasses instead of WebSocketRestfullMiddleware and WebSocketHub generic types. Note: If you bind your own subclass instead of WebSocketHub, all your Web Socket controllers should be use your binded subclass
-            return builder.MapWebSocket<WebSocketRestfullJWTMiddleware, WSHub>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize, loggAllWebSocketRequestAndResponse: loggAllWebSocketRequestAndResponse);
+            return builder.MapWebSocket<WebSocketRestfuJWTMiddleware, WSHub>(path, keepAliveInterval: keepAliveInterval, receiveBufferSize: receiveBufferSize, loggAllWebSocketRequestAndResponse: loggAllWebSocketRequestAndResponse);
         }
     }
 }
