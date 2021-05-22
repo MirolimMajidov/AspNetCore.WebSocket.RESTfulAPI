@@ -15,15 +15,15 @@ AspNetCore.WebSocket.RESTfulAPI - is a communication library with Web Socket lik
   <tbody>
     <tr>
         <td align="center">1.</td>
-        <td> <a href="https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfullAPI">AspNetCore.WebSocket.RESTfullAPI</a></td>
+        <td> <a href="https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI">AspNetCore.WebSocket.RESTfulAPI</a></td>
         <td>This for implementing and using Web Socket on ASP.Net Core to create real-time communication app for building chat, game or other.</td>
-        <td> <a href="https://app.swaggerhub.com/apis-docs/mirolimjon/AspNetCore.WebSocket.RESTfullAPI/1.0.0">View</a> </td>
+        <td> <a href="https://app.swaggerhub.com/apis-docs/mirolimjon/AspNetCore.WebSocket.RESTfulAPI/1.0.0">View</a> </td>
     </tr>
     <tr>
         <td align="center">2.</td>
-        <td> <a href="https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfullAPI.JWT/">AspNetCore.WebSocket.RESTfullAPI.JWT</a></td>
-        <td>This library also for creating real-time communication app like AspNetCore.WebSocket.RESTfullAPI, but it is customized for using authorized user by JSON Web Token (JWT)</td>
-        <td> <a href="https://app.swaggerhub.com/apis-docs/mirolimjon/AspNetCore.WebSocket.RESTfullAPI/1.0.0">View</a> </td>
+        <td> <a href="https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI.JWT/">AspNetCore.WebSocket.RESTfulAPI.JWT</a></td>
+        <td>This library also for creating real-time communication app like AspNetCore.WebSocket.RESTfulAPI, but it is customized for using authorized user by JSON Web Token (JWT)</td>
+        <td> <a href="https://app.swaggerhub.com/apis-docs/mirolimjon/AspNetCore.WebSocket.RESTfulAPI/1.0.0">View</a> </td>
     </tr>
   </tbody>  
 </table>
@@ -32,20 +32,20 @@ AspNetCore.WebSocket.RESTfulAPI - is a communication library with Web Socket lik
 ## Getting Started
 ### Setup the server
 
-Make sure you have configured [Web Sockets for IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/websocket) in your machine. After that, you need to instal AspNetCore.WebSocket.RESTfullAPI NuGet.
+Make sure you have configured [Web Sockets for IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/websocket) in your machine. After that, you need to instal AspNetCore.WebSocket.RESTfulAPI NuGet.
 
 ```powershell
-Install-Package AspNetCore.WebSocket.RESTfullAPI
+Install-Package AspNetCore.WebSocket.RESTfulAPI
 ```
 Add the WebSocket's classes to the services in the ConfigureServices method of the Startup class:
 ```
 services.AddWebSocketManager();
 ```
-Add the `WebSocketRESTfullAPI` middleware in the Configure method of the Startup class:
+Add the `WebSocketRESTfulAPI` middleware in the Configure method of the Startup class:
 ```
-app.WebSocketRESTfullAPI("/WSMessenger");
+app.WebSocketRESTfulAPI("/WSMessenger");
 ```
-You can configured the Web socket by passing data to needed parameters of WebSocketRESTfullAPI method: <br/>
+You can configured the Web socket by passing data to needed parameters of WebSocketRESTfulAPI method: <br/>
 `Path` - Path to bind Web socket to listen client. Here path is "WSMessenger" and client should cannect to this path "ws://{BaseSiteURL}/WSMessenger". <br/>
 `ReceiveBufferSize` - Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb. Passing this parameter is nor required. <br/>
 `KeepAliveInterval` - Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds. Passing this parameter is nor required. <br/>
@@ -74,8 +74,8 @@ public class ChatController
 }
 ```
  The controller name must be start from `{NameController}Controller` and it should have constructor parameters for `WebSocketHub`, `WSUserInfo` and `ILogger`: <br/>
-`WebSocketHub` - This is will be use for sending data by notification to another needed users or for getting acces to the WebSocketManager to get all active client with users data. It can be sub class of WebSocketHub if you want to override (See example from AspNetCore.WebSocket.RESTfullAPI.JWT project to override).<br/>
-`WSUserInfo` - To get needed user info which we attach on creating Web socket. It can be sub class of WSUserInfo if you want to override user data and add some other user information to this parameter (See example from AspNetCore.WebSocket.RESTfullAPI.JWT project to create sub class and to use it).<br/>
+`WebSocketHub` - This is will be use for sending data by notification to another needed users or for getting acces to the WebSocketManager to get all active client with users data. It can be sub class of WebSocketHub if you want to override (See example from AspNetCore.WebSocket.RESTfulAPI.JWT project to override).<br/>
+`WSUserInfo` - To get needed user info which we attach on creating Web socket. It can be sub class of WSUserInfo if you want to override user data and add some other user information to this parameter (See example from AspNetCore.WebSocket.RESTfulAPI.JWT project to create sub class and to use it).<br/>
 `ILogger` - This is just for adding logg if it's needed.
 
 Example to create API:
@@ -100,11 +100,11 @@ All configurations of client same other Web Socket client connection except Head
 
 
 ## Result
-You can find example for both NuGets from [Test folder](https://github.com/MirolimMajidov/WebSocket.RESTfullAPI/tree/master/tests)<br/>
+You can find example for both NuGets from [Test folder](https://github.com/MirolimMajidov/WebSocket.RESTfulAPI/tree/master/tests)<br/>
 <center><img src="img/ClientOfWebSocketRESTfull.png"/></center>
 
 ## Override
-See example from [AspNetCore.WebSocket.RESTfullAPI.JWT](https://github.com/MirolimMajidov/WebSocket.RESTfullAPI/tree/master/src/AspNetCore.WebSocket.RESTfullAPI.JWT) project to override AspNetCore.WebSocket.RESTfullAPI's some classes and methods and events like `OnConnectedAsync`, `OnDisconnectedAsync` and other.
+See example from [AspNetCore.WebSocket.RESTfulAPI.JWT](https://github.com/MirolimMajidov/WebSocket.RESTfulAPI/tree/master/src/AspNetCore.WebSocket.RESTfulAPI.JWT) project to override AspNetCore.WebSocket.RESTfulAPI's some classes and methods and events like `OnConnectedAsync`, `OnDisconnectedAsync` and other.
 
 ## Support
 Did you like this NuGet package? If it's helpful for you, supporting by buying me a coffee.

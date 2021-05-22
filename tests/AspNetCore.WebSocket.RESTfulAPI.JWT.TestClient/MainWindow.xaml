@@ -1,0 +1,26 @@
+﻿<Window x:Class="AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient"
+        mc:Ignorable="d"
+        Title="AspNetCore.WebSocket.RESTfulAPI.JWT" Height="450" Width="800">
+    <StackPanel >
+        <StackPanel Orientation="Horizontal">
+            <TextBlock MinWidth="100px">User name:</TextBlock>
+            <TextBox Uid="UserName" x:Name="UserName" MinWidth="600px">Benom</TextBox>
+        </StackPanel >
+        <Button Uid="connectButton" x:Name="connectButton" Click="ConnectButton_Click">Connect</Button>
+        <Button Uid="deconnectButton" x:Name="deconnectButton" IsEnabled="False" Click="deconnectButton_Click">Deconnect</Button>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock MinWidth="150px">User id to send message (Integer):</TextBlock>
+            <TextBox Uid="UserId" x:Name="UserId" MinWidth="50px"></TextBox>
+            <TextBlock MinWidth="150px">Message to send:</TextBlock>
+            <TextBox Uid="Message" x:Name="Message" MinWidth="250px"></TextBox>
+        </StackPanel >
+        <Button Uid="sendButton" x:Name="sendButton" IsEnabled="False" Click="sendButton_Click">Send</Button>
+        <Button Uid="userInfoButton" x:Name="userInfoButton" IsEnabled="False" Click="userInfoButton_Click">UserInfo</Button>
+        <ListView  Uid="messagesList" x:Name="messagesList"></ListView>
+    </StackPanel>
+</Window>
