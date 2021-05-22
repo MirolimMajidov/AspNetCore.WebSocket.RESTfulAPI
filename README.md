@@ -1,6 +1,6 @@
-# AspNetCore.WebSocket.RESTfullAPI 
+# AspNetCore.WebSocket.RESTfulAPI 
 
-AspNetCore.WebSocket.RESTfullAPI - is a communication library with Web Socket like RESTfull API on ASP.NET Core applications. It is easy to set up, and runs on all recent .NET, .NET Framework and .NET Standard platforms. It's used in apps that benefit from fast, real-time communication, such as chat, dashboard, and game applications.
+AspNetCore.WebSocket.RESTfulAPI - is a communication library with Web Socket like RESTful API on ASP.NET Core applications. It is easy to set up, and runs on all recent .NET, .NET Framework and .NET Standard platforms. It's used in apps that benefit from fast, real-time communication, such as chat, dashboard, and game applications.
 
 
 ## List of NuGet packages
