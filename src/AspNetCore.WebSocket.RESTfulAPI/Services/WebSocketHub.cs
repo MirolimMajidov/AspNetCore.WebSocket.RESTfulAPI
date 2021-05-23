@@ -74,7 +74,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI
         /// <param name="method">Method name to natify the client</param>
         public static async Task SendNotificationAsync(System.Net.WebSockets.WebSocket socket, object responseData, string method, ILogger logger, object userId = null)
         {
-            var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson();
+            var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson(logger);
             await SendMessageAsync(socket, responseMessage: responseMessage, method: method, userId: userId, logger: logger);
         }
 
@@ -86,7 +86,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI
         /// <param name="method">Method name to natify the client</param>
         public async Task SendNotificationAsync(object userId, object responseData, string method)
         {
-            var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson();
+            var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson(_logger);
             await SendMessageAsync(WSManager.GetWebSocket(userId), responseMessage: responseMessage, method: method, userId: userId, logger: _logger);
         }
 
@@ -98,7 +98,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI
         /// <param name="method">Method name to natify the client</param>
         public async Task SendNotificationAsync(IEnumerable<object> userIds, object responseData, string method)
         {
-            var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson();
+            var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson(_logger);
             foreach (var socketId in userIds)
                 await SendMessageAsync(WSManager.GetWebSocket(socketId), responseMessage: responseMessage, method: method, userId: socketId, logger: _logger);
         }
@@ -192,7 +192,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI
                     Error = responseModel.Error,
                     Result = responseModel.Result
                 };
-                await SendMessageAsync(socket, response.GenerateJson(), logger: _logger, method: response.Method, userId: userId);
+                await SendMessageAsync(socket, response.GenerateJson(_logger), logger: _logger, method: response.Method, userId: userId);
             }
         }
     }

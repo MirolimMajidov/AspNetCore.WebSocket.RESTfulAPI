@@ -1,5 +1,7 @@
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
 using System.Threading.Tasks;
 
 namespace AspNetCore.WebSocket.RESTfulAPI
@@ -86,10 +88,21 @@ namespace AspNetCore.WebSocket.RESTfulAPI
         /// Serialize any object to string
         /// </summary>
         /// <param name="textJson">Object for serializing</param>
+        /// <param name="logger">ILogger to write an error if it cannot serialize</param>
         /// <returns>Serialized string value</returns>
-        public static string GenerateJson(object textJson)
+        public static string GenerateJson(object textJson, ILogger logger = null)
         {
-            return JsonConvert.SerializeObject(textJson, Formatting.Indented, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore, ContractResolver = new CamelCasePropertyNamesContractResolver() });
+            try
+            {
+                return JsonConvert.SerializeObject(textJson, Formatting.Indented, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore, ContractResolver = new CamelCasePropertyNamesContractResolver() });
+            }
+            catch (Exception ex)
+            {
+                if (logger != null)
+                    logger.LogError($"An error on serializing object. Message: {ex.Message}!");
+
+                return null;
+            }
         }
     }
 
@@ -98,10 +111,11 @@ namespace AspNetCore.WebSocket.RESTfulAPI
         /// <summary>
         /// Serialize current object to string
         /// </summary>
+        /// <param name="logger">ILogger to write an error if it cannot serialize</param>
         /// <returns>Serialized string value</returns>
-        public static string GenerateJson(this ResponseModel requestModel)
+        public static string GenerateJson(this ResponseModel requestModel, ILogger logger = null)
         {
-            return ResponseModel.GenerateJson(requestModel);
+            return ResponseModel.GenerateJson(requestModel, logger);
         }
     }
 }
