@@ -1,6 +1,7 @@
 # AspNetCore.WebSocket.RESTfulAPI 
 [![Version](https://img.shields.io/nuget/vpre/AspNetCore.WebSocket.RESTfulAPI?label=Downloads:AspNetCore.WebSocket.RESTfulAPI)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI)
 [![Downloads](https://img.shields.io/nuget/dt/AspNetCore.WebSocket.RESTfulAPI?label=Downloads:AspNetCore.WebSocket.RESTfulAPI)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI)
+
 [![Version](https://img.shields.io/nuget/vpre/AspNetCore.WebSocket.RESTfulAPI.JWT?label=Downloads:AspNetCore.WebSocket.RESTfulAPI.JWT)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI.JWT)
 [![Downloads](https://img.shields.io/nuget/dt/AspNetCore.WebSocket.RESTfulAPI.JWT?label=Downloads:AspNetCore.WebSocket.RESTfulAPI.JWT)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI.JWT)
 
