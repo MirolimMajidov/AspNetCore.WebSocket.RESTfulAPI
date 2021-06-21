@@ -1,14 +1,14 @@
 # AspNetCore.WebSocket.RESTfulAPI 
-[![Version](https://img.shields.io/nuget/vpre/AspNetCore.WebSocket.RESTfulAPI?label=Downloads:AspNetCore.WebSocket.RESTfulAPI)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI)
-[![Downloads](https://img.shields.io/nuget/dt/AspNetCore.WebSocket.RESTfulAPI?label=Downloads:AspNetCore.WebSocket.RESTfulAPI)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI)
-
-[![Version](https://img.shields.io/nuget/vpre/AspNetCore.WebSocket.RESTfulAPI.JWT?label=Downloads:AspNetCore.WebSocket.RESTfulAPI.JWT)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI.JWT)
-[![Downloads](https://img.shields.io/nuget/dt/AspNetCore.WebSocket.RESTfulAPI.JWT?label=Downloads:AspNetCore.WebSocket.RESTfulAPI.JWT)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI.JWT)
 
 AspNetCore.WebSocket.RESTfulAPI - is a communication library with Web Socket like RESTful API for ASP.NET Core applications. It is easy to set up and runs on all recent .NET, .NET Framework and .NET Standard platforms. It's used in apps that benefit from fast, real-time communication, such as chat, dashboard, and game applications.
 
 
 ## List of NuGet packages
+[![Version](https://img.shields.io/nuget/vpre/AspNetCore.WebSocket.RESTfulAPI?label=Downloads:AspNetCore.WebSocket.RESTfulAPI)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI)
+[![Downloads](https://img.shields.io/nuget/dt/AspNetCore.WebSocket.RESTfulAPI?label=Downloads:AspNetCore.WebSocket.RESTfulAPI)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI)
+
+[![Version](https://img.shields.io/nuget/vpre/AspNetCore.WebSocket.RESTfulAPI.JWT?label=Downloads:AspNetCore.WebSocket.RESTfulAPI.JWT)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI.JWT)
+[![Downloads](https://img.shields.io/nuget/dt/AspNetCore.WebSocket.RESTfulAPI.JWT?label=Downloads:AspNetCore.WebSocket.RESTfulAPI.JWT)](https://www.nuget.org/packages/AspNetCore.WebSocket.RESTfulAPI.JWT)
            
 <table>
    <thead>
