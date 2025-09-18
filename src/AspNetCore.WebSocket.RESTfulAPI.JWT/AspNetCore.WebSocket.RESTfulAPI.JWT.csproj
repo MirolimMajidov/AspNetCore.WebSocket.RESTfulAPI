@@ -21,11 +21,4 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.6" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="C:\Users\Mirolim\Desktop\WebSocket.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
-
 </Project>

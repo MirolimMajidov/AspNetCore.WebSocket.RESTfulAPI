@@ -11,16 +11,22 @@
             <TextBlock MinWidth="100px">User name:</TextBlock>
             <TextBox Uid="UserName" x:Name="UserName" MinWidth="600px">Benom</TextBox>
         </StackPanel >
-        <Button Uid="connectButton" x:Name="connectButton" Click="connectButton_Click">Connect</Button>
-        <Button Uid="deconnectButton" x:Name="deconnectButton" IsEnabled="False" Click="deconnectButton_Click">Deconnect</Button>
+        <Button Uid="connectButton" x:Name="ConnectButton" Click="connectButton_Click">Connect</Button>
+        <Button Uid="disconnectButton" x:Name="DisconnectButton" IsEnabled="False" Click="disconnectButton_Click">Disconnect</Button>
         <StackPanel Orientation="Horizontal">
             <TextBlock MinWidth="150px">User id to send message (Guid):</TextBlock>
             <TextBox Uid="UserId" x:Name="UserId" MinWidth="150px"></TextBox>
             <TextBlock MinWidth="150px">Message to send:</TextBlock>
             <TextBox Uid="Message" x:Name="Message" MinWidth="250px"></TextBox>
         </StackPanel >
-        <Button Uid="sendButton" x:Name="sendButton" IsEnabled="False" Click="sendButton_Click">Send</Button>
-        <Button Uid="userInfoButton" x:Name="userInfoButton" IsEnabled="False" Click="userInfoButton_Click">UserInfo</Button>
-        <ListView  Uid="messagesList" x:Name="messagesList"></ListView>
+        <Button Uid="sendButton" x:Name="SendButton" IsEnabled="False" Click="sendButton_Click">Send</Button>
+        <Button Uid="userInfoButton" x:Name="UserInfoButton" IsEnabled="False" Click="userInfoButton_Click">UserInfo</Button>
+        <ListView Uid="messagesList" x:Name="MessagesList">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" IsHitTestVisible="True" TextWrapping="Wrap"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </StackPanel>
 </Window>

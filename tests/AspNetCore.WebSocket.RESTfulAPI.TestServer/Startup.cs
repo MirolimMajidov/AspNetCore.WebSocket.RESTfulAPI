@@ -1,3 +1,5 @@
+using AspNetCore.WebSocket.RESTfulAPI.Configurations;
+using AspNetCore.WebSocket.RESTfulAPI.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +21,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.TestServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddWebSocketManager();
+            services.AddWebSocketServices();
             services.AddControllers();
 
             #region API Documents
@@ -73,7 +75,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.TestServer
             app.UseRouting();
 
             app.UseAuthorization();
-            app.WebSocketRESTfulAPI("/WSMessenger", receiveBufferSize: 5, keepAliveInterval: 30, loggAllWebSocketRequestAndResponse: false);
+            app.WebSocketRESTfulAPI("/WSMessenger", receiveBufferSize: 5, keepAliveInterval: 30, logAllWebSocketRequestAndResponse: false);
 
             app.UseEndpoints(endpoints =>
             {

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCore.WebSocket.RESTfulAPI.Models;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.TestServer.Controllers
 {
