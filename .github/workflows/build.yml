@@ -25,13 +25,13 @@ jobs:
           dotnet restore "src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj"
 #          dotnet restore "src/AspNetCore.WebSocket.RESTfulAPI.JWT/AspNetCore.WebSocket.RESTfulAPI.JWT.csproj"
 
-      - name: Build the InMemoryMessaging in Debug mode
+      - name: Build the projects in Debug mode
         if: github.event_name == 'pull_request'
         run: |
           dotnet build "src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj" --configuration Debug --no-restore
 #          dotnet build "src/AspNetCore.WebSocket.RESTfulAPI.JWT/AspNetCore.WebSocket.RESTfulAPI.JWT.csproj" --configuration Debug --no-restore
 
-      - name: Build the InMemoryMessaging in Release mode
+      - name: Build the projects in Release mode
         if: github.event_name != 'pull_request'
         run: |
           dotnet build "src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj" --configuration Release --no-restore
