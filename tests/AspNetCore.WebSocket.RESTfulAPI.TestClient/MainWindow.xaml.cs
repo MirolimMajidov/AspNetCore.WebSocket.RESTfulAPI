@@ -18,7 +18,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.TestClient
     {
         private readonly ClientWebSocket _ws;
         private readonly Thread _wsReceiving;
-        private ObservableCollection<string> _messages = new ObservableCollection<string>();
+        private readonly ObservableCollection<string> _messages = [];
 
         public MainWindow()
         {
@@ -148,7 +148,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.TestClient
 
         private async Task Sending(string method, params (string key, object value)[] parameters)
         {
-            Dictionary<string, object> pairs = new Dictionary<string, object>();
+            var pairs = new Dictionary<string, object>();
             foreach (var paramItem in parameters)
                 pairs.Add(paramItem.key, paramItem.value);
 

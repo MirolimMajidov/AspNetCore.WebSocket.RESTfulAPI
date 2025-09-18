@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Newtonsoft.Json.Linq;
 
 
 namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
@@ -14,15 +16,21 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        ClientWebSocket ws;
-        Thread wsReceiving;
-        public static string wsId = string.Empty;
+        private readonly ClientWebSocket _ws;
+        private readonly Thread _wsReceiving;
+        private readonly ObservableCollection<string> _messages = [];
 
         public MainWindow()
         {
             InitializeComponent();
-            ws = new ClientWebSocket();
-            wsReceiving = new Thread(new ThreadStart(ReceivingTest));
+            MessagesList.ItemsSource = _messages;
+            _ws = new ClientWebSocket();
+            _wsReceiving = new Thread(ReceivingTest);
+        }
+        
+        private void AddMessage(string message)
+        {
+            _messages.Add(message);
         }
 
         void ReceivingTest()
@@ -42,34 +50,33 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
             {
                 if (!string.IsNullOrEmpty(UserName.Text))
                 {
-                    var userId = new Random().Next(5, 100);
+                    var userId = Guid.NewGuid();
                     var values = new Dictionary<string, string>
                     {
                         { "UserName", UserName.Text },
                         { "UserId", userId.ToString() }
                     };
-                    var responce = await GetContext.PostRequest<RequestModel>("http://localhost:5000/api/Account/Authorization", values);
+                    var response = await GetContext.PostRequest<RequestModel>("http://localhost:5000/api/Account/Authorization", values);
+                    if(response == null || response.ErrorId>0)
+                        MessageBox.Show($"An error on getting access token '{response?.Error}'");
 
-                    if(responce == null || responce.ErrorId>0)
-                        MessageBox.Show($"An error on getting access token '{responce.Error}'");
-
-                    ws.Options.SetRequestHeader("Authorization", "Bearer " + responce.Result);
-                    if (ws.State != WebSocketState.Open)
+                    _ws.Options.SetRequestHeader("Authorization", "Bearer " + response!.Result);
+                    if (_ws.State != WebSocketState.Open)
                     {
-                        ws.ConnectAsync(new Uri($"ws://localhost:5000/WSMessenger"), CancellationToken.None).GetAwaiter().GetResult();
+                        _ws.ConnectAsync(new Uri("ws://localhost:5000/WSMessenger"), CancellationToken.None).GetAwaiter().GetResult();
                     }
 
-                    if (ws.State == WebSocketState.Open)
+                    if (_ws.State == WebSocketState.Open)
                     {
-                        wsReceiving.Start();
-                        connectButton.IsEnabled = false;
-                        sendButton.IsEnabled = true;
-                        userInfoButton.IsEnabled = true;
-                        deconnectButton.IsEnabled = true;
+                        _wsReceiving.Start();
+                        ConnectButton.IsEnabled = false;
+                        SendButton.IsEnabled = true;
+                        UserInfoButton.IsEnabled = true;
+                        DisconnectButton.IsEnabled = true;
                     }
                     else
                     {
-                        messagesList.Items.Add("Connection failed");
+                        AddMessage("Connection failed");
                     }
                 }
                 else
@@ -79,31 +86,31 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
             }
             catch (Exception ex)
             {
-                messagesList.Items.Add(ex.Message);
+                AddMessage(ex.Message);
             }
         }
 
-        private async void deconnectButton_Click(object sender, RoutedEventArgs e)
+        private async void disconnectButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Test", CancellationToken.None);
+                await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Test", CancellationToken.None);
 
-                if (ws.State == WebSocketState.Closed)
+                if (_ws.State == WebSocketState.Closed)
                 {
-                    messagesList.Items.Add("WebSocket deconnected");
-                    connectButton.IsEnabled = true;
-                    sendButton.IsEnabled = false;
-                    deconnectButton.IsEnabled = false;
+                    AddMessage("WebSocket disconnected");
+                    ConnectButton.IsEnabled = true;
+                    SendButton.IsEnabled = false;
+                    DisconnectButton.IsEnabled = false;
                 }
                 else
                 {
-                    messagesList.Items.Add("Deconnection failed");
+                    AddMessage("Disconnecting socket failed");
                 }
             }
             catch (Exception ex)
             {
-                messagesList.Items.Add(ex.Message);
+                AddMessage(ex.Message);
             }
         }
 
@@ -114,7 +121,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
                 var message = Message.Text;
                 if (!string.IsNullOrEmpty(message))
                 {
-                    if (int.TryParse(UserId.Text, out int userId))
+                    if (Guid.TryParse(UserId.Text, out Guid userId))
                     {
                         await Sending("Chat.Message", ("message", message), ("userId", userId.ToString()));
                     }
@@ -130,19 +137,20 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
             }
             catch (Exception ex)
             {
-                messagesList.Items.Add(ex.Message);
+                AddMessage(ex.Message);
             }
         }
 
+        const string UserInfoKey = "User.Info";
         private async void userInfoButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                await Sending("User.Info");
+                await Sending(UserInfoKey);
             }
             catch (Exception ex)
             {
-                messagesList.Items.Add(ex.Message);
+                MessagesList.Items.Add(ex.Message);
             }
         }
 
@@ -152,7 +160,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
             foreach (var paramItem in parameters)
                 pairs.Add(paramItem.key, paramItem.value);
 
-            var request = new RequestModel()
+            var request = new RequestModel
             {
                 Id = Guid.NewGuid().ToString(),
                 Method = method,
@@ -161,7 +169,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
 
             var jsonObject = request.SerializeObject();
             ArraySegment<byte> bytesToSend = new ArraySegment<byte>(Encoding.UTF8.GetBytes(jsonObject));
-            await ws.SendAsync(bytesToSend, WebSocketMessageType.Binary, true, CancellationToken.None);
+            await _ws.SendAsync(bytesToSend, WebSocketMessageType.Binary, true, CancellationToken.None);
         }
 
         private async Task Receiving()
@@ -170,9 +178,9 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
 
             while (true)
             {
-                if (ws.State == WebSocketState.Open)
+                if (_ws.State == WebSocketState.Open)
                 {
-                    var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    var result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
                     if (result.MessageType == WebSocketMessageType.Binary)
                     {
@@ -180,7 +188,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
                         {
                             var responseMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
                             var response = RequestModel.DeserializeJsonObject(responseMessage);
-                            object dataToAddMessageList = response.Method + ", result: ";
+                            string dataToAddMessageList = response.Method + ", result: ";
                             if (response.ErrorId == 0)
                             {
                                 if (response.Method == "WSConnected")
@@ -189,12 +197,23 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
                                 }
                                 else
                                 {
-                                    dataToAddMessageList += response.Result?.ToString() ?? response.Data?.ToString();
+                                    var responseResult = response.Result ?? response.Data;
+                                    if (response.Method == UserInfoKey && responseResult is JObject jObject)
+                                    {
+                                        var userId = jObject["id"]?.ToString();
+                                        if (!string.IsNullOrEmpty(userId))
+                                        {
+                                            Clipboard.SetText(userId);
+                                            
+                                            AddMessage("User Id copied to clipboard!");
+                                        }
+                                    }
+                                    dataToAddMessageList += responseResult?.ToString();
                                 }
                             }
                             else
                             {
-                                var error = "Error: " + response.Error?.ToString() + ", ErrorId: " + response.ErrorId;
+                                var error = "Error: " + response.Error + ", ErrorId: " + response.ErrorId;
                                 switch (response.Method)
                                 {
                                     case "ConnectionAborted":
@@ -209,14 +228,14 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
                                 }
                             }
 
-                            messagesList.Items.Add(dataToAddMessageList);
+                            AddMessage(dataToAddMessageList);
                         });
                     }
                     else
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            messagesList.Items.Add(result.CloseStatusDescription);
+                            AddMessage(result.CloseStatusDescription);
                         });
                         break;
                     }

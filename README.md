@@ -35,7 +35,7 @@ AspNetCore.WebSocket.RESTfulAPI - is a communication library with Web Socket lik
 
 
 ## Getting Started
-### Setup the server
+### Setting up the server
 
 Make sure you have configured [Web Sockets for IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/websocket) in your machine. After that, you need to instal AspNetCore.WebSocket.RESTfulAPI NuGet.
 
@@ -85,7 +85,7 @@ public class ChatController
 
 Example to create API:
 ```
-[WSHubMethodName("Chat.Message")]
+[WsHubMethodName("Chat.Message")]
 public async Task<ResponseModel> MessageWithFriend(Guid userId, string message)
 {
     await _socketHub.SendNotificationAsync(userId, $"{_wsUserInfo.Name} user send '{message}' message", "Chat.Message");
@@ -93,15 +93,15 @@ public async Task<ResponseModel> MessageWithFriend(Guid userId, string message)
 }
 ```
 
-Here `WSHubMethodName` to pass full name of API. First one must be controller name and last one must be API name, and both of them should be pass with `.`. The parameters of method should be different dependent of your logic and each parameter can be optional.<br/>
+Here `WsHubMethodName` to pass full name of API. First one must be controller name and last one must be API name, and both of them should be pass with `.`. The parameters of method should be different dependent of your logic and each parameter can be optional.<br/>
 The method of response type must be `ResponseModel`. ResponseModel class has some needed helper method to reponse just by passing needed data to `SuccessRequestAsync` method or `NoAccessAsync` to return error.<br/>
 By using `SendNotificationAsync` method of WebSocketHub, you be able to send data by notification to the another user. It will accept UserId, list of UserId or WebSocket connection to send notification.<br/>
-Also, you able to use `SwaggerDoc` on Web Socket controller and APIs.
+Also, you are able to use `SwaggerDoc` on Web Socket controller and APIs.
 
-### Setup the client
+### Set up the client
 All configurations of client same other Web Socket client connection except Headers, because Headers of client must have information for `UserName` and `UserId`:<br/>
 `UserName` - Header's value should be string.<br/>
-`UserId` - Header's value can be anything (Guid, Integer, String ...), but it must be unique.
+`UserId` - Header's value must be unique and Guid type.<br/>
 
 
 ## Result

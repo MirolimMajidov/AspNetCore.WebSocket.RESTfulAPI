@@ -1,3 +1,5 @@
+using AspNetCore.WebSocket.RESTfulAPI.Configurations;
+using AspNetCore.WebSocket.RESTfulAPI.JWT.Middlewares;
 using AspNetCore.WebSocket.RESTfulAPI.JWT.TestServer.Configurations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,7 +23,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAuthentications();
-            services.AddWebSocketManager();
+            services.AddWebSocketServices();
 
             #region API Documents
 
@@ -75,7 +77,7 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestServer
 
             app.UseRouting();
             app.UseAuthorization();
-            app.WebSocketRESTfullJWT("/WSMessenger", receiveBufferSize: 5, keepAliveInterval: 30);
+            app.WebSocketRESTfulApiJwt("/WSMessenger", receiveBufferSize: 5, keepAliveInterval: 30);
 
             app.UseEndpoints(endpoints =>
             {

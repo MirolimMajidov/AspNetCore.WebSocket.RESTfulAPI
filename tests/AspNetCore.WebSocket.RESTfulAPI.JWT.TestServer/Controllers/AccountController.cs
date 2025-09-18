@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AspNetCore.WebSocket.RESTfulAPI.Models;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestServer.Controllers
 {
@@ -24,12 +25,12 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestServer.Controllers
         [HttpPost("Authorization")]
         [SwaggerOperation(Summary = "For authorization user to jobs services")]
         [SwaggerResponse(200, "Return token when authorization finished successfully", typeof(string))]
-        public async Task<ResponseModel> Authorization([FromForm, SwaggerParameter("Name of user", Required = true)] string userName, [FromForm, SwaggerParameter("Id of user", Required = true)] int userId)
+        public async Task<ResponseModel> Authorization([FromForm, SwaggerParameter("Name of user", Required = true)] string userName, [FromForm, SwaggerParameter("Id of user", Required = true)] Guid? userId)
         {
-            if (string.IsNullOrEmpty(userName) || userId == 0)
+            if (string.IsNullOrEmpty(userName) || userId is null || userId == Guid.Empty)
                 return await ResponseModel.NoAccessAsync();
 
-            var token = await GenerateToken(userName, userId);
+            var token = await GenerateToken(userName, userId.Value);
             return await ResponseModel.SuccessRequestAsync(token);
         }
 
@@ -42,9 +43,10 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestServer.Controllers
         /// <summary>
         /// This is for creating new token by new identity
         /// </summary>
-        /// <param name="user">User info</param>
+        /// <param name="userName">The name of user</param>
+        /// <param name="userId">The id of user</param>
         /// <returns>Return new generated token, refresh token and hash token</returns>
-        private static async Task<string> GenerateToken(string userName, int userId)
+        private static async Task<string> GenerateToken(string userName, Guid userId)
         {
             return await Task.Run(async () =>
             {
@@ -70,13 +72,15 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestServer.Controllers
         /// This is for creating new Identity by existent old identity or user and claims (IP address, mobile model, mobile id)
         /// </summary>
         /// <returns>Return new created ClaimsIdentity</returns>
-        private static async Task<ClaimsIdentity> GenerateIdentity(string userName, int userId)
+        private static async Task<ClaimsIdentity> GenerateIdentity(string userName, Guid userId)
         {
             return await Task.Run(() =>
             {
-                List<Claim> claims = new();
-                claims.Add(CreateClaim(ClaimTypes.Name, userName));
-                claims.Add(CreateClaim("UserId", userId.ToString()));
+                List<Claim> claims =
+                [
+                    CreateClaim(ClaimTypes.Name, userName),
+                    CreateClaim("UserId", userId.ToString())
+                ];
 
                 static Claim CreateClaim(string key, string value) => new(key, value);
 
