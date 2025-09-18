@@ -44,7 +44,7 @@ Install-Package AspNetCore.WebSocket.RESTfulAPI
 ```
 Add the WebSocket's classes to the services in the ConfigureServices method of the Startup class:
 ```
-services.AddWebSocketManager();
+services.AddWebSocketServices();
 ```
 Add the `WebSocketRESTfulAPI` middleware in the Configure method of the Startup class:
 ```
@@ -53,10 +53,10 @@ app.WebSocketRESTfulAPI("/WSMessenger");
 You can configured the Web socket by passing data to needed parameters of WebSocketRESTfulAPI method: <br/>
 `Path` - Path to bind Web socket to listen client. Here path is "WSMessenger" and client should cannect to this path "ws://{BaseSiteURL}/WSMessenger". <br/>
 `ReceiveBufferSize` - Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb. Passing this parameter is nor required. <br/>
-`KeepAliveInterval` - Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 secunds. Passing this parameter is nor required. <br/>
-`LoggAllWebSocketRequestAndResponse` - When you turn on it all request and response data of web socket will be logged to the your configurated file. By default it's false because it can be effect to performance. <br/>
+`KeepAliveInterval` - Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 seconds. Passing this parameter is nor required. <br/>
+`LogAllWebSocketRequestAndResponse` - When you turn on it all request and response data of web socket will be logged. By default, it's false because it can be effected to performance. <br/>
 
-All configuration is done. Now, you able to create your own Web Socket controllers with APIs.<br/> 
+All configuration is done. Now, you are able to create your own Web Socket controllers with APIs.<br/> 
 
 First you need to create a new folder which name `Hubs` on project and create new controller for Web socket APIs.
 
@@ -65,10 +65,10 @@ Example code:
 public class ChatController
 {
     private readonly WebSocketHub _socketHub;
-    private readonly WSUserInfo _wsUserInfo;
+    private readonly WsUserInfo _wsUserInfo;
     private readonly ILogger _logger;
 
-    public ChatController(WebSocketHub socketHub, WSUserInfo wsUserInfo, ILogger logger)
+    public ChatController(WebSocketHub socketHub, WsUserInfo wsUserInfo, ILogger logger)
     {
         _socketHub = socketHub;
         _wsUserInfo = wsUserInfo;
@@ -79,8 +79,8 @@ public class ChatController
 }
 ```
  The controller name must be start from `{NameController}Controller` and it should have constructor parameters for `WebSocketHub`, `WSUserInfo` and `ILogger`: <br/>
-`WebSocketHub` - This is will be use for sending data by notification to another needed users or for getting acces to the WebSocketManager to get all active client with users data. It can be sub class of WebSocketHub if you want to override (See example from AspNetCore.WebSocket.RESTfulAPI.JWT project to override).<br/>
-`WSUserInfo` - To get needed user info which we attach on creating Web socket. It can be sub class of WSUserInfo if you want to override user data and add some other user information to this parameter (See example from AspNetCore.WebSocket.RESTfulAPI.JWT project to create sub class and to use it).<br/>
+`WebSocketHub` - This is will be used for sending data by notification to another needed users or for getting access to the WebSocketManager to get all active client with users data. It can be sub class of WebSocketHub if you want to override (See example from AspNetCore.WebSocket.RESTfulAPI.JWT project to override).<br/>
+`WsUserInfo` - To get needed user info which we attach on creating Web socket. It can be sub-class of WSUserInfo if you want to override user data and add some other user information to this parameter (See example from AspNetCore.WebSocket.RESTfulAPI.JWT project to create sub class and to use it).<br/>
 `ILogger` - This is just for adding logg if it's needed.
 
 Example to create API:
@@ -99,14 +99,14 @@ By using `SendNotificationAsync` method of WebSocketHub, you be able to send dat
 Also, you able to use `SwaggerDoc` on Web Socket controller and APIs.
 
 ### Setup the client
-All configurations of client same other Web Socket client connection except Headers, becasue Headers of client must have information for `UserName` and `UserId`:<br/>
+All configurations of client same other Web Socket client connection except Headers, because Headers of client must have information for `UserName` and `UserId`:<br/>
 `UserName` - Header's value should be string.<br/>
 `UserId` - Header's value can be anything (Guid, Integer, String ...), but it must be unique.
 
 
 ## Result
 You can find example for both NuGets from [Test folder](https://github.com/MirolimMajidov/WebSocket.RESTfulAPI/tree/master/tests)<br/>
-<center><img src="img/ClientOfWebSocketRESTfull.png"/></center>
+<center><img src="img/ClientOfWebSocketRESTful.png"/></center>
 
 ## Override
 See example from [AspNetCore.WebSocket.RESTfulAPI.JWT](https://github.com/MirolimMajidov/WebSocket.RESTfulAPI/tree/master/src/AspNetCore.WebSocket.RESTfulAPI.JWT) project to override AspNetCore.WebSocket.RESTfulAPI's some classes and methods and events like `OnConnectedAsync`, `OnDisconnectedAsync` and other.
