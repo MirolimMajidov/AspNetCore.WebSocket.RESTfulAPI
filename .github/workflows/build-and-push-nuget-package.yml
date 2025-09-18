@@ -34,9 +34,11 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
-      - name: Restore dependencies
-        run: dotnet restore ${{ inputs.project_file_path }}
-
+      - name: Restore dependencies and build the project
+        run: |
+          dotnet restore ${{ inputs.project_file_path }}
+          dotnet build ${{ inputs.project_file_path }}  --configuration Release
+          
       - name: Pack the NuGet package
         run: dotnet pack ${{ inputs.project_file_path }} --configuration Release --output ./nupkgs -p:Version="${{ inputs.version }}"
 
