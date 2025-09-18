@@ -21,7 +21,7 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
     /// </summary>
     /// <param name="socket">New created socket</param>
     /// <param name="userInfo">Current User info</param>
-    public async Task OnConnectedAsync(System.Net.WebSockets.WebSocket socket, WsUserInfo userInfo)
+    public virtual async Task OnConnectedAsync(System.Net.WebSockets.WebSocket socket, WsUserInfo userInfo)
     {
         await Manager.AddSocket(userInfo.Id, socket, userInfo);
 
@@ -32,7 +32,7 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
     /// To disconnect exists WebSocket from the WebSocketManager's sockets list
     /// </summary>
     /// <param name="socketId">The id of current WebSocket to disconnect</param>
-    public async Task OnDisconnectedAsync(Guid? socketId)
+    public virtual async Task OnDisconnectedAsync(Guid? socketId)
     {
         if (socketId is null) return;
 
