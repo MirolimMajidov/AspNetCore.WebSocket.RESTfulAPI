@@ -34,22 +34,11 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
-      - name: Add GitHub Packages source if it does not exist
-        run: |
-          if ! dotnet nuget list source | grep -q "${{ vars.NUGET_SOURCE }}"; then
-            dotnet nuget add source ${{ vars.NUGET_SOURCE }} --name github --username ${{ github.actor }} --password ${{ secrets.github_nuget_source_secret }} --store-password-in-clear-text
-          else
-            echo "Source already exists, skipping addition."
-          fi
-
       - name: Restore dependencies
         run: dotnet restore ${{ inputs.project_file_path }}
 
       - name: Pack the NuGet package
         run: dotnet pack ${{ inputs.project_file_path }} --configuration Release --output ./nupkgs -p:Version="${{ inputs.version }}"
-
-      - name: Push the package to GitHub Packages
-        run: dotnet nuget push ./nupkgs/*.nupkg --source "${{ vars.NUGET_SOURCE }}"
 
       - name: Push the package to NuGet.org
         run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.nuget_org_api_key }} --source https://api.nuget.org/v3/index.json
