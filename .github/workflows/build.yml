@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 9.0.x
+          
+      - name: Restore dependencies
+        run: |
+          dotnet restore "src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj"
+          dotnet restore "src/AspNetCore.WebSocket.RESTfulAPI.JWT/AspNetCore.WebSocket.RESTfulAPI.JWT.csproj"
+
+      - name: Build the InMemoryMessaging in Debug mode
+        if: github.event_name == 'pull_request'
+        run: |
+          dotnet build "src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj" --configuration Debug --no-restore
+          dotnet build "src/AspNetCore.WebSocket.RESTfulAPI.JWT/AspNetCore.WebSocket.RESTfulAPI.JWT.csproj" --configuration Debug --no-restore
+
+      - name: Build the InMemoryMessaging in Release mode
+        if: github.event_name != 'pull_request'
+        run: |
+          dotnet build "src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj" --configuration Release --no-restore
+          dotnet build "src/AspNetCore.WebSocket.RESTfulAPI.JWT/AspNetCore.WebSocket.RESTfulAPI.JWT.csproj" --configuration Release --no-restore

@@ -1,0 +1,63 @@
+name: Push NuGet package
+
+on:
+  workflow_call:
+    inputs:
+      package_name:
+        required: false
+        type: string
+      application_name:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      project_file_path:
+        required: true
+        type: string
+    secrets:
+      nuget_org_api_key:
+        required: true
+      github_nuget_source_secret:
+        required: true
+
+jobs:
+  PushNugetPackage:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Add GitHub Packages source if it does not exist
+        run: |
+          if ! dotnet nuget list source | grep -q "${{ vars.NUGET_SOURCE }}"; then
+            dotnet nuget add source ${{ vars.NUGET_SOURCE }} --name github --username ${{ github.actor }} --password ${{ secrets.github_nuget_source_secret }} --store-password-in-clear-text
+          else
+            echo "Source already exists, skipping addition."
+          fi
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ inputs.project_file_path }}
+
+      - name: Pack the NuGet package
+        run: dotnet pack ${{ inputs.project_file_path }} --configuration Release --output ./nupkgs -p:Version="${{ inputs.version }}"
+
+      - name: Push the package to GitHub Packages
+        run: dotnet nuget push ./nupkgs/*.nupkg --source "${{ vars.NUGET_SOURCE }}"
+
+      - name: Push the package to NuGet.org
+        run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.nuget_org_api_key }} --source https://api.nuget.org/v3/index.json
+
+      - name: Generate release notes
+        run: |
+          echo "## Release notes of ${{ inputs.application_name }} library 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "- NuGet package name: **${{ inputs.package_name }}"** >> $GITHUB_STEP_SUMMARY
+          echo "- New version: **${{ inputs.version }}"** >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        shell: bash

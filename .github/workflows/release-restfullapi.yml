@@ -1,0 +1,27 @@
+name: Release the AspNetCore.WebSocket.RESTfulAPI package
+
+on:
+  workflow_dispatch:  # Allows the workflow to be triggered manually
+
+permissions:
+  contents: write  # Grant the workflow permission to push to the repository
+
+jobs:
+  Versioning:
+    uses: ./.github/workflows/service-versioning.yml
+    with:
+      project_file_path: "src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj"
+      should_add_version_tag: ${{ github.ref == 'refs/heads/main' }}
+    secrets: inherit
+  
+  Release:
+    needs: Versioning
+    uses: ./.github/workflows/build-and-push-nuget-package.yml
+    with:
+      project_file_path: 'src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj'
+      version: ${{ needs.Versioning.outputs.version }}
+      package_name: 'AspNetCore.WebSocket.RESTfulAPI'
+      application_name: 'AspNetCore.WebSocket.RESTfulAPI'
+    secrets:
+      nuget_org_api_key: ${{ secrets.RESTfulAPI_NUGET_ORG_API_KEY }}
+      github_nuget_source_secret: ${{ secrets.NUGET_SOURCE_SECRET }}

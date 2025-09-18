@@ -11,6 +11,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E13F7671
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.WebSocket.RESTfulAPI", "src\AspNetCore.WebSocket.RESTfulAPI\AspNetCore.WebSocket.RESTfulAPI.csproj", "{548F7ABF-BC13-4C93-A733-354085D342B2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{A27C0FBB-F640-4887-B489-5332638CC9E4}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\service-versioning.yml = .github\workflows\service-versioning.yml
+		.github\workflows\release-restfullapi.yml = .github\workflows\release-restfullapi.yml
+		.github\workflows\release-restfullapi-jwt.yml = .github\workflows\release-restfullapi-jwt.yml
+		.github\workflows\build-and-push-nuget-package.yml = .github\workflows\build-and-push-nuget-package.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
