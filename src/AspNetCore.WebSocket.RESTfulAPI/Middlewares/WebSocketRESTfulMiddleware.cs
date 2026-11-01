@@ -124,9 +124,22 @@ public static class WebSocketHubExtensions
         var serviceProvider = serviceScopeFactory.CreateScope().ServiceProvider;
         var wsHub = serviceProvider.GetService<TWebSocketHub>();
 
-        var assembly = Assembly.GetEntryAssembly();
-        var assemblyName = assembly!.GetName().Name;
-        var controllers = assembly.ExportedTypes.Where(c => c.FullName?.StartsWith($"{assemblyName}.Hubs.") == true && c.FullName.EndsWith("Controller")).ToList();
+        var controllerAssemblies = new[]
+            {
+                Assembly.GetEntryAssembly(),
+                typeof(TMiddleware).Assembly,
+                typeof(TWebSocketHub).Assembly
+            }
+            .Where(assembly => assembly != null)
+            .Distinct();
+        var controllers = controllerAssemblies
+            .SelectMany(assembly => assembly!.ExportedTypes)
+            .Where(type => type.IsClass &&
+                           !type.IsAbstract &&
+                           type.Name.EndsWith("Controller") &&
+                           type.GetMethods().Any(method => method.GetWsHubAttribute() != null))
+            .Distinct()
+            .ToList();
         foreach (var controller in controllers)
             CreateController(controller);
 
