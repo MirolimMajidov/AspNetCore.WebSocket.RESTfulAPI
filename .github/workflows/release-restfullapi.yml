@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: write  # Grant the workflow permission to push to the repository
+  id-token: write  # Allow NuGet/login to request a GitHub OIDC token
 
 jobs:
   Versioning:
@@ -16,12 +17,36 @@ jobs:
   
   Release:
     needs: Versioning
-    uses: ./.github/workflows/build-and-push-nuget-package.yml
-    with:
-      project_file_path: 'src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj'
-      version: ${{ needs.Versioning.outputs.version }}
-      package_name: 'AspNetCore.WebSocket.RESTfulAPI'
-      application_name: 'AspNetCore.WebSocket.RESTfulAPI'
-    secrets:
-      nuget_org_api_key: ${{ secrets.RESTfulAPI_NUGET_ORG_API_KEY }}
-      github_nuget_source_secret: ${{ secrets.NUGET_SOURCE_SECRET }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore dependencies and build the project
+        run: |
+          dotnet restore src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj
+          dotnet build src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj --configuration Release
+
+      - name: Pack the NuGet package
+        run: dotnet pack src/AspNetCore.WebSocket.RESTfulAPI/AspNetCore.WebSocket.RESTfulAPI.csproj --configuration Release --output ./nupkgs -p:Version="${{ needs.Versioning.outputs.version }}"
+
+      - name: Log in to NuGet.org with Trusted Publishing
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: mirolimmajidov
+
+      - name: Push the package to NuGet.org
+        run: dotnet nuget push ./nupkgs/*.nupkg --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json
+
+      - name: Generate release notes
+        run: |
+          echo "## Release notes of AspNetCore.WebSocket.RESTfulAPI library 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "- NuGet package name: **AspNetCore.WebSocket.RESTfulAPI**" >> $GITHUB_STEP_SUMMARY
+          echo "- New version: **${{ needs.Versioning.outputs.version }}**" >> $GITHUB_STEP_SUMMARY
