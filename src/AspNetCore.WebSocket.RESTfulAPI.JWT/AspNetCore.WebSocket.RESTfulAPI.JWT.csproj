@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.WebSocket.RESTfulAPI" Version="2.0.1" />
+    <PackageReference Include="AspNetCore.WebSocket.RESTfulAPI" Version="2.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
   </ItemGroup>
 

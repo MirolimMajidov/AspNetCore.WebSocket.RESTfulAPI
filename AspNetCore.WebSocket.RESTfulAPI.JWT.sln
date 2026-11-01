@@ -14,7 +14,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{93B9DDFA-52D9-49DA-B7DF-E06E1A9105DD}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build.yml = .github\workflows\build.yml
-		.github\workflows\build-and-push-nuget-package.yml = .github\workflows\build-and-push-nuget-package.yml
 		.github\workflows\release-restfullapi.yml = .github\workflows\release-restfullapi.yml
 		.github\workflows\release-restfullapi-jwt.yml = .github\workflows\release-restfullapi-jwt.yml
 		.github\workflows\service-versioning.yml = .github\workflows\service-versioning.yml
