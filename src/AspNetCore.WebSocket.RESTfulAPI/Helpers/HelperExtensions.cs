@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 
@@ -24,11 +26,20 @@ public static class HelperExtensions
         {
             if (value == null || value is DBNull) return null;
 
+            if (value is JsonElement jsonElement)
+                return JsonSerializer.Deserialize(jsonElement.GetRawText(), typeTo,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        Converters = { new JsonStringEnumConverter() }
+                    });
+
             if (typeTo.IsEnum)
             {
                 return Enum.ToObject(typeTo, value);
             }
-            else if (typeTo.IsArray)
+
+            if (typeTo.IsArray)
             {
                 Type type = typeTo.GetElementType();
                 var imputValue = value.ToString().TrimStart('[').TrimEnd(']');
@@ -43,17 +54,16 @@ public static class HelperExtensions
                     return elements.Select(s => (int)Convert.ChangeType(s, type)).ToArray();
                 }
             }
-            else if (typeTo.Name == nameof(Guid))
+
+            if (typeTo.Name == nameof(Guid))
             {
                 return Guid.Parse(value.ToString());
             }
-            else
-            {
-                if (typeTo.IsGenericType && typeTo.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    return Convert.ChangeType(value, Nullable.GetUnderlyingType(typeTo));
-                else
-                    return Convert.ChangeType(value, typeTo);
-            }
+
+            if (typeTo.IsGenericType && typeTo.GetGenericTypeDefinition() == typeof(Nullable<>))
+                return Convert.ChangeType(value, Nullable.GetUnderlyingType(typeTo));
+            
+            return Convert.ChangeType(value, typeTo);
         }
         catch (Exception ex)
         {

@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
@@ -14,11 +14,12 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
             {
                 var httpContent = new FormUrlEncodedContent(pairs);
                 using HttpClient client = new();
-                using HttpResponseMessage responce = await client.PostAsync(urlAPI, httpContent);
-                using HttpContent content = responce.Content;
-                var responceData =  await content.ReadAsStringAsync();
+                using HttpResponseMessage response = await client.PostAsync(urlAPI, httpContent);
+                using HttpContent content = response.Content;
+                var responseData = await content.ReadAsStringAsync();
 
-                return JsonConvert.DeserializeObject<T>(responceData);
+                return JsonSerializer.Deserialize<T>(responseData,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
             catch (Exception)
             {

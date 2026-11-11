@@ -1,25 +1,35 @@
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.Models;
 
 public class ResponseModel
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int ErrorId { get; set; }
-    public bool ShouldSerializeErrorId() => ErrorId > 0;
 
-    [JsonProperty("Description")]
-    public string Error { get; set; } = string.Empty;
-    public bool ShouldSerializeError() => !string.IsNullOrEmpty(Error);
+    [JsonPropertyName("Description")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string Error { get; set; } = null!;
 
     /// <summary>
     /// It will be get value when the data returning by Web Socket RESTful API
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public object Result { get; set; }
-    public bool ShouldSerializeResult() => Result != null;
+
+    internal static JsonSerializerOptions JsonOptions { get; } = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        ReferenceHandler = ReferenceHandler.IgnoreCycles,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters = { new JsonStringEnumConverter() }
+    };
 
     /// <summary>
     /// Create response model for an error
@@ -94,7 +104,7 @@ public class ResponseModel
     {
         try
         {
-            return JsonConvert.SerializeObject(textJson, Formatting.Indented, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore, ContractResolver = new CamelCasePropertyNamesContractResolver() });
+            return JsonSerializer.Serialize(textJson, JsonOptions);
         }
         catch (Exception ex)
         {

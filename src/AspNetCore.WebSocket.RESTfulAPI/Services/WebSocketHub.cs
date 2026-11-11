@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using AspNetCore.WebSocket.RESTfulAPI.Helpers;
 using AspNetCore.WebSocket.RESTfulAPI.Models;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.Services;
 
@@ -126,7 +126,8 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
         Guid? userId = null;
         try
         {
-            var requestModel = JsonConvert.DeserializeObject<NotificationResponseModel>(receiveMessageData);
+            var requestModel = JsonSerializer.Deserialize<NotificationResponseModel>(receiveMessageData,
+                ResponseModel.JsonOptions) ?? throw new JsonException("The WebSocket request body is empty.");
             var userInfo = Manager.GetUserInfo(socket);
             userId = userInfo?.Id;
 
@@ -209,7 +210,7 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
 
         if (responseModel != null)
         {
-            var response = new NotificationResponseModel()
+            var response = new NotificationResponseModel
             {
                 Id = requestId,
                 Method = requestMethod,

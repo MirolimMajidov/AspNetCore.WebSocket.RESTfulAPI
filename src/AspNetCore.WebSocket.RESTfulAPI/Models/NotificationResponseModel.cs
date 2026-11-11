@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.Models;
 
@@ -8,16 +9,14 @@ public class NotificationResponseModel : ResponseModel
 
     public string Id { get; set; } = string.Empty;
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, object> Params { get; init; }
-        
-    public bool ShouldSerializeParams() => false;
 
     /// <summary>
     /// It will be get value when the data sending by Notification
     /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public object Data { get; set; }
-        
-    public bool ShouldSerializeData() => Data != null;
 
     /// <summary>
     /// Create response model for NoAccess to WS an error. Massage of error will be "You cannot get access to Websocket!!!"

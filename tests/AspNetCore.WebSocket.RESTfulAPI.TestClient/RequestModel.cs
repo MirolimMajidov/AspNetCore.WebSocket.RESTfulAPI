@@ -1,43 +1,38 @@
-﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.TestClient
 {
     public class RequestModel
     {
         public string Id { get; set; } = string.Empty;
-
         public string Method { get; set; } = string.Empty;
-
         public Dictionary<string, object> Params { get; set; }
-
         public object Result { get; set; }
-        public bool ShouldSerializeResult() => false;
         public object Data { get; set; }
-
         public int ErrorId { get; set; }
-        public bool ShouldSerializeErrorId() => false;
 
-        [JsonProperty("Description")]
-        public string Error { get; set; } = string.Empty;
-        public bool ShouldSerializeError() => false;
+        [JsonPropertyName("Description")]
+        public string Error { get; set; } = null!;
 
-        public static string SerializeObject(object textJson)
+        private static JsonSerializerOptions JsonOptions { get; } = new()
         {
-            return JsonConvert.SerializeObject(textJson, Formatting.Indented, new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore });
-        }
+            WriteIndented = true,
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+            Converters = { new JsonStringEnumConverter() }
+        };
 
-        public static RequestModel DeserializeJsonObject(string textJson)
-        {
-            return JsonConvert.DeserializeObject<RequestModel>(textJson);
-        }
+        public static string SerializeObject(object textJson) => JsonSerializer.Serialize(textJson, JsonOptions);
+
+        public static RequestModel DeserializeJsonObject(string textJson) =>
+            JsonSerializer.Deserialize<RequestModel>(textJson, JsonOptions);
     }
 
     public static class RequestModelExtensions
     {
-        public static string SerializeObject(this RequestModel requestModel)
-        {
-            return RequestModel.SerializeObject(requestModel);
-        }
+        public static string SerializeObject(this RequestModel requestModel) =>
+            RequestModel.SerializeObject(requestModel);
     }
 }

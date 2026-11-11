@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Newtonsoft.Json.Linq;
 
 
 namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
@@ -198,9 +198,12 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestClient
                                 else
                                 {
                                     var responseResult = response.Result ?? response.Data;
-                                    if (response.Method == UserInfoKey && responseResult is JObject jObject)
+                                    if (response.Method == UserInfoKey && responseResult is JsonElement jsonElement &&
+                                        jsonElement.ValueKind == JsonValueKind.Object)
                                     {
-                                        var userId = jObject["id"]?.ToString();
+                                        var userId = jsonElement.TryGetProperty("id", out var id)
+                                            ? id.GetString()
+                                            : null;
                                         if (!string.IsNullOrEmpty(userId))
                                         {
                                             Clipboard.SetText(userId);
