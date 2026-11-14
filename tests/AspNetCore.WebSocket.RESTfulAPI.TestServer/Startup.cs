@@ -39,13 +39,18 @@ namespace AspNetCore.WebSocket.RESTfulAPI.TestServer
                 c.SwaggerDoc("WS", new OpenApiInfo
                 {
                     Title = "WebSocket APIs documentation",
-                    Description = "The server will return some error codes before starting the WebSocket APIs: " +
-                    "101) The problem on excuting Websocket's request; " +
-                    "102) Request's Id or method is empty; " +
-                    "103) Websocket request will support only one or two levels methods; " +
-                    "104) Sended method's class is invalid; " +
-                    "105) The user doesn't exist with sended WS data; " +
-                    "106) Sended method's parameters is invalid; ",
+                    Description = "WebSocket request error codes: " +
+                    "101) Request body contains invalid JSON; " +
+                    "102) Required request property 'id' or 'method' is missing or empty; " +
+                    "103) Method name has an invalid format; expected 'Controller.Method'; " +
+                    "104) Controller discovery failed during server endpoint initialization; " +
+                    "105) WebSocket connection is not registered or is no longer authenticated; " +
+                    "106) One or more method parameters are missing or invalid; " +
+                    "107) Requested WebSocket method was not found; " +
+                    "108) Controller activation failed; " +
+                    "109) WebSocket endpoint configuration is invalid; " +
+                    "110) Method execution failed; the client receives a safe, non-sensitive server-error message. " +
+                    "Controller discovery and activation errors may instead fail server startup or be reported as a safe 110 response.",
                     Version = "v1"
                 });
             });

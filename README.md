@@ -1,6 +1,6 @@
 # AspNetCore.WebSocket.RESTfulAPI 
 
-AspNetCore.WebSocket.RESTfulAPI - is a communication library with Web Socket like RESTful API for ASP.NET Core applications. It is easy to set up and runs on all recent .NET, .NET Framework and .NET Standard platforms. It uses in applications that benefit for fast, real-time communication such as chat and game applications.
+AspNetCore.WebSocket.RESTfulAPI is a WebSocket communication library for ASP.NET Core applications. It exposes controller methods as lightweight REST-style WebSocket operations for real-time applications such as chat and games. The current projects target .NET 10.
 
 
 ## List of NuGet packages
@@ -37,28 +37,23 @@ AspNetCore.WebSocket.RESTfulAPI - is a communication library with Web Socket lik
 ## Getting Started
 ### Setting up the server
 
-Make sure you have configured [Web Sockets for IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/websocket) in your machine. After that, you need to instal AspNetCore.WebSocket.RESTfulAPI NuGet.
+Make sure WebSockets are enabled in your hosting environment (for example, [WebSockets for IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/websocket)). Install the package and register the services:
 
 ```powershell
 Install-Package AspNetCore.WebSocket.RESTfulAPI
 ```
-Add the WebSocket's classes to the services in the ConfigureServices method of the Startup class:
 ```
 services.AddWebSocketServices();
 ```
-Add the `WebSocketRESTfulAPI` middleware in the Configure method of the Startup class:
+Map the middleware in the HTTP pipeline:
 ```
 app.WebSocketRESTfulAPI("/WSMessenger");
 ```
-You can configured the Web socket by passing data to needed parameters of WebSocketRESTfulAPI method: <br/>
-`Path` - Path to bind Web socket to listen client. Here path is "WSMessenger" and client should cannect to this path "ws://{BaseSiteURL}/WSMessenger". <br/>
-`ReceiveBufferSize` - Gets or sets the size of the protocol buffer used to receive and parse frames. The default is 4 kb. Passing this parameter is nor required. <br/>
-`KeepAliveInterval` - Gets or sets the frequency at which to send Ping/Pong keep-alive control frames. The default is 60 seconds. Passing this parameter is nor required. <br/>
-`LogAllWebSocketRequestAndResponse` - When you turn on it all request and response data of web socket will be logged. By default, it's false because it can be effected to performance. <br/>
+Configuration parameters are optional: `path` is the WebSocket endpoint (for example, clients connect to `ws://{BaseSiteURL}/WSMessenger`), `receiveBufferSize` controls the protocol buffer (default 4 KB), `keepAliveInterval` controls ping/pong keep-alives (default 60 seconds), and `logAllWebSocketRequestAndResponse` enables full payload logging (default `false`). Keep payload logging disabled in production because request and response data may contain sensitive information.
 
 All configuration is done. Now, you are able to create your own Web Socket controllers with APIs.<br/> 
 
-First you need to create a new folder which name `Hubs` on project and create new controller for Web socket APIs.
+Create a controller in a `Hubs` folder (or another assembly discovered by the middleware).
 
 Example code:
 ```
@@ -66,42 +61,86 @@ public class ChatController
 {
     private readonly WebSocketHub _socketHub;
     private readonly WsUserInfo _wsUserInfo;
-    private readonly ILogger _logger;
 
-    public ChatController(WebSocketHub socketHub, WsUserInfo wsUserInfo, ILogger logger)
+    public ChatController(WebSocketHub socketHub, WsUserInfo wsUserInfo)
     {
         _socketHub = socketHub;
         _wsUserInfo = wsUserInfo;
-        _logger = logger;
     }
 
     //Your APIs  
 }
 ```
- The controller name must be start from `{NameController}Controller` and it should have constructor parameters for `WebSocketHub`, `WSUserInfo` and `ILogger`: <br/>
-`WebSocketHub` - This is will be used for sending data by notification to another needed users or for getting access to the WebSocketManager to get all active client with users data. It can be sub class of WebSocketHub if you want to override (See example from AspNetCore.WebSocket.RESTfulAPI.JWT project to override).<br/>
-`WsUserInfo` - To get needed user info which we attach on creating Web socket. It can be sub-class of WSUserInfo if you want to override user data and add some other user information to this parameter (See example from AspNetCore.WebSocket.RESTfulAPI.JWT project to create sub class and to use it).<br/>
-`ILogger` - This is just for adding logg if it's needed.
+WebSocket controllers must end in `Controller` and have exactly one public constructor with exactly these two parameters: `WebSocketHub` (or the registered derived hub) and `WsUserInfo` (or a compatible derived user-info type). Do not inject services into the controller constructor. This restriction allows controller factories and endpoint metadata to be prepared once during startup.
+
+Services such as repositories and `ILogger<T>` must be endpoint parameters marked with `[FromServices]`. A new DI scope is created for every WebSocket request, and those services are resolved from that request scope.
 
 Example to create API:
 ```
 [WsHubMethodName("Chat.Message")]
-public async Task<ResponseModel> MessageWithFriend(Guid userId, string message)
+public async Task<ResponseModel> MessageWithFriend(
+    Guid userId,
+    string message,
+    [FromServices] ILogger<ChatController> logger)
 {
+    logger.LogInformation("Sending a chat message.");
     await _socketHub.SendNotificationAsync(userId, $"{_wsUserInfo.Name} user send '{message}' message", "Chat.Message");
-    return await ResponseModel.SuccessRequestAsync($"'{message}' message sended to '{userId}' user");
+    return await ResponseModel.SuccessRequestAsync($"'{message}' message sent to '{userId}' user");
 }
 ```
 
-Here `WsHubMethodName` to pass full name of API. First one must be controller name and last one must be API name, and both of them should be pass with `.`. The parameters of method should be different dependent of your logic and each parameter can be optional.<br/>
-The method of response type must be `ResponseModel`. ResponseModel class has some needed helper method to reponse just by passing needed data to `SuccessRequestAsync` method or `NoAccessAsync` to return error.<br/>
-By using `SendNotificationAsync` method of WebSocketHub, you be able to send data by notification to the another user. It will accept UserId, list of UserId or WebSocket connection to send notification.<br/>
-Also, you are able to use `SwaggerDoc` on Web Socket controller and APIs.
+`WsHubMethodName` must contain exactly one dot in the form `Controller.Method`; malformed names are rejected. Endpoint methods must return `Task<ResponseModel>`. Parameters supplied by the client are converted and validated before invocation; optional parameters may define defaults. Parameters marked `[FromServices]` are never read from the client payload. `SendNotificationAsync` can target a user ID, a collection of user IDs, or a WebSocket connection.
+
+Endpoint metadata, controller factories, parameter bindings, and invokers are cached during startup, so requests do not repeatedly scan controllers or reflect over methods.
+
+### WebSocket request and response format
+
+Send a JSON object as a binary WebSocket message. The middleware treats non-binary messages as a disconnect:
+
+```json
+{
+  "id": "request-123",
+  "method": "Chat.Message",
+  "params": {
+    "userId": "00000000-0000-0000-0000-000000000000",
+    "message": "Hello"
+  }
+}
+```
+
+The response contains the request `id`, method name, and either `result` or a client-safe error. Server exception details, connection strings, file paths, and other sensitive data are not returned to clients.
+
+The library uses these WebSocket error codes:
+
+| Code | Meaning |
+| --- | --- |
+| 101 | Invalid JSON request body |
+| 102 | Missing or empty request `id` or `method` |
+| 103 | Invalid method format; expected `Controller.Method` |
+| 104 | Controller discovery failed during endpoint initialization |
+| 105 | Connection is not registered or is no longer authenticated |
+| 106 | Missing or invalid endpoint parameters |
+| 107 | Requested method was not found |
+| 108 | Controller activation failed |
+| 109 | Invalid endpoint configuration |
+| 110 | Internal method execution failure; the client receives a sanitized message |
 
 ### Set up the client
-All configurations of client same other Web Socket client connection except Headers, because Headers of client must have information for `UserName` and `UserId`:<br/>
-`UserName` - Header's value should be string.<br/>
-`UserId` - Header's value must be unique and Guid type.<br/>
+
+Use any WebSocket client. During the handshake, the default middleware expects `UserName` (a non-empty string) and `UserId` (a unique GUID) headers. The JWT package provides the corresponding JWT-authenticated middleware and hub extension; its connection/authentication rules should be followed instead of sending untrusted identity headers.
+
+### JWT-authenticated WebSockets
+
+Install `AspNetCore.WebSocket.RESTfulAPI.JWT` when the WebSocket identity must come from a JWT instead of `UserName` and `UserId` handshake headers. Register authentication and WebSocket services, then map the JWT middleware:
+
+```csharp
+services.AddAuthentications();
+services.AddWebSocketServices();
+
+app.WebSocketRESTfulApiJwt("/WSMessenger");
+```
+
+The JWT middleware reads the authenticated principal's `UserId` claim as a GUID and its name claim as the user name. Invalid, expired, missing, or incomplete authentication is rejected during connection setup.
 
 
 ## Result
