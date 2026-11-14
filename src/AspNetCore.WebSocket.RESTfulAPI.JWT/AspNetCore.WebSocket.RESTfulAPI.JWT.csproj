@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Authors>Mirolim Majidov</Authors>
     <Company>PanjakentGroup</Company>
-    <Description>This is for using WebSocket like RESTful API include authentication JwtBearer on ASP.NET Core project to create tool for everything. TargetFramework is .Net 5.0</Description>
+    <Description>This is for using WebSocket like RESTful API include authentication JwtBearer on ASP.NET Core project to create tool for everything. TargetFramework is .NET 10.0</Description>
     <RepositoryType>https://github.com/MirolimMajidov/AspNetCore.WebSocket.RESTfulAPI</RepositoryType>
     <RepositoryUrl>https://github.com/MirolimMajidov/AspNetCore.WebSocket.RESTfulAPI</RepositoryUrl>
     <PackageTags>AspNetCore.WebSocket.RESTfulAPI.JWT,AspNetCore.WebSocket.RESTfulAPI, AspNetCore, WebSocket, RESTfulAPI</PackageTags>
@@ -15,8 +15,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.WebSocket.RESTfulAPI" Version="2.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
+    <PackageReference Include="AspNetCore.WebSocket.RESTfulAPI" Version="2.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.15" />
   </ItemGroup>
 
 </Project>
