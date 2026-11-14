@@ -37,7 +37,7 @@ AspNetCore.WebSocket.RESTfulAPI is a WebSocket communication library for ASP.NET
 ## Getting Started
 ### Setting up the server
 
-Make sure WebSockets are enabled in your hosting environment (for example, [WebSockets for IIS](https://docs.microsoft.com/en-us/iis/configuration/system.webserver/websocket)). Install the package and register the services:
+Make sure WebSockets are enabled in your hosting environment (for example, [WebSockets for IIS](https://learn.microsoft.com/iis/configuration/system.webserver/websocket)). Install version 2.0.12 and register the services:
 
 ```powershell
 Install-Package AspNetCore.WebSocket.RESTfulAPI
@@ -131,7 +131,7 @@ Use any WebSocket client. During the handshake, the default middleware expects `
 
 ### JWT-authenticated WebSockets
 
-Install `AspNetCore.WebSocket.RESTfulAPI.JWT` when the WebSocket identity must come from a JWT instead of `UserName` and `UserId` handshake headers. Register authentication and WebSocket services, then map the JWT middleware:
+Install `AspNetCore.WebSocket.RESTfulAPI.JWT` when the WebSocket identity must come from a JWT instead of `UserName` and `UserId` handshake headers. Its current package uses `AspNetCore.WebSocket.RESTfulAPI` 2.0.12. Register authentication and WebSocket services, then map the JWT middleware:
 
 ```csharp
 services.AddAuthentications();
