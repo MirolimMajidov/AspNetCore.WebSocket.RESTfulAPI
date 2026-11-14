@@ -11,7 +11,7 @@ public class WsMethod
 
     public MethodInfo Method { get; set; }
 
-    public List<ParameterInfo> Parameters { get; set; } = new List<ParameterInfo>();
+    public List<ParameterInfo> Parameters { get; set; } = [];
 
     internal Func<object, object[], Task<ResponseModel>> InvokeAsync { get; set; }
 
@@ -22,4 +22,6 @@ public class WsMethod
     internal object[] DefaultValues { get; set; }
 
     internal bool[] HasDefaultValues { get; set; }
+
+    internal bool[] FromServices { get; set; }
 }

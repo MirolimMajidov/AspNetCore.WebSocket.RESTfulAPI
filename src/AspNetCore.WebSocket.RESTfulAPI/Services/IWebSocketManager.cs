@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AspNetCore.WebSocket.RESTfulAPI.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.Services;
 
@@ -11,6 +12,11 @@ using System.Net.WebSockets;
 public interface IWebSocketManager
 {
     public List<WsController> Controllers { get; }
+
+    /// <summary>
+    /// Creates an isolated dependency-injection scope for one WebSocket request.
+    /// </summary>
+    public IServiceScope CreateScope();
 
     /// <summary>
     /// Gets Socket from all active user list by ID

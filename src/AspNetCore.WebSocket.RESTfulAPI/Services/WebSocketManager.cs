@@ -6,11 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using AspNetCore.WebSocket.RESTfulAPI.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.Services;
 using System.Net.WebSockets;
 
-public class WebSocketManager(ILogger<WebSocketManager> logger) : Disposable, IWebSocketManager
+public class WebSocketManager(ILogger<WebSocketManager> logger, IServiceScopeFactory scopeFactory) : Disposable, IWebSocketManager
 {
     private readonly ConcurrentDictionary<Guid, (WebSocket WS, WsUserInfo Info)> _sockets = new();
     private readonly ConcurrentDictionary<WebSocket, Guid> _socketIds = new();
@@ -20,6 +21,8 @@ public class WebSocketManager(ILogger<WebSocketManager> logger) : Disposable, IW
     public List<WsController> Controllers { get; set; } = new();
 
     private readonly ILogger _logger = logger;
+
+    public IServiceScope CreateScope() => scopeFactory.CreateScope();
 
     public WebSocket GetWebSocket(Guid socketId)
     {

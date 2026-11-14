@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using AspNetCore.WebSocket.RESTfulAPI.Helpers;
 using AspNetCore.WebSocket.RESTfulAPI.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.Services;
 
@@ -191,6 +192,7 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                         "The required request property 'method' is missing or empty.",
                         WebSocketErrorCodes.MissingRequestProperty);
                 }
+
                 else
                 {
                     var separatorIndex = requestMethod.IndexOf('.');
@@ -198,11 +200,17 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                     {
                         if (_endpointsByName.TryGetValue(requestMethod, out var endpoint))
                         {
+                            using var requestScope = Manager.CreateScope();
                             var methodParams = new object[endpoint.Method.ParameterNames.Length];
                             for (var index = 0; index < endpoint.Method.ParameterNames.Length; index++)
                             {
                                 parameterName = endpoint.Method.ParameterNames[index];
-                                if (requestModel.Params != null &&
+                                if (endpoint.Method.FromServices[index])
+                                {
+                                    methodParams[index] = requestScope.ServiceProvider.GetRequiredService(
+                                        endpoint.Method.ParameterTypes[index]);
+                                }
+                                else if (requestModel.Params != null &&
                                     requestModel.Params.TryGetValue(parameterName, out var value))
                                 {
                                     methodParams[index] = value.ConvertTo(endpoint.Method.ParameterTypes[index]);
@@ -218,7 +226,8 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                                 }
                             }
 
-                            var callingClass = endpoint.Controller.Factory(this, userInfo, logger);
+                            var callingClass = endpoint.Controller.Factory(requestScope.ServiceProvider,
+                                [this, userInfo]);
                             using var controllerLifetime = callingClass as IDisposable;
                             executingMethod = true;
                             responseModel = await endpoint.Method.InvokeAsync(callingClass, methodParams);

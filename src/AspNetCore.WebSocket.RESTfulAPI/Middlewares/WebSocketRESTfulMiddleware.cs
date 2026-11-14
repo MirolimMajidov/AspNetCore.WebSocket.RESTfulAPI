@@ -168,22 +168,28 @@ public static class WebSocketHubExtensions
 
         void CreateController(Type controller)
         {
-            var constructor = controller.GetConstructors().SingleOrDefault(candidate =>
-            {
-                var parameters = candidate.GetParameters();
-                return parameters.Length == 3 &&
-                       parameters[0].ParameterType.IsAssignableFrom(typeof(TWebSocketHub)) &&
-                       typeof(WsUserInfo).IsAssignableFrom(parameters[1].ParameterType) &&
-                       parameters[2].ParameterType.IsAssignableFrom(typeof(ILogger));
-            }) ?? throw new InvalidOperationException(
-                $"WebSocket controller '{controller.FullName}' must have exactly one public constructor " +
-                $"compatible with ({typeof(TWebSocketHub).Name}, {nameof(WsUserInfo)}, {nameof(ILogger)}).");
+            var constructors = controller.GetConstructors()
+                .Select(candidate => (Constructor: candidate, Parameters: candidate.GetParameters()))
+                .Where(candidate => (candidate.Parameters.Length == 2 ||
+                                     candidate.Parameters.Length == 3 &&
+                                     typeof(ILogger).IsAssignableFrom(candidate.Parameters[2].ParameterType)) &&
+                                    candidate.Parameters[0].ParameterType.IsAssignableFrom(typeof(TWebSocketHub)) &&
+                                    typeof(WsUserInfo).IsAssignableFrom(candidate.Parameters[1].ParameterType))
+                .ToArray();
+            if (constructors.Length != 1)
+                throw new InvalidOperationException(
+                    $"WebSocket controller '{controller.FullName}' must have exactly one public constructor with the " +
+                    $"({typeof(TWebSocketHub).Name}, {nameof(WsUserInfo)}) parameters. " +
+                    "All other services must be method parameters marked with [FromServices].");
+
+            var constructorParameters = constructors[0].Parameters;
 
             var wsController = new WsController
             {
                 Name = controller.Name[..^10],
                 Controller = controller,
-                Factory = CompileControllerFactory(constructor)
+                Factory = ActivatorUtilities.CreateFactory(controller,
+                    [constructorParameters[0].ParameterType, constructorParameters[1].ParameterType])
             };
             var methods = controller.GetMethods().Where(m => m.GetWsHubAttribute() != null);
             foreach (var method in methods)
@@ -207,26 +213,13 @@ public static class WebSocketHubExtensions
                 ParameterNames = parameters.Select(parameter => parameter.Name!).ToArray(),
                 ParameterTypes = parameters.Select(parameter => parameter.ParameterType).ToArray(),
                 DefaultValues = parameters.Select(parameter => parameter.DefaultValue).ToArray(),
-                HasDefaultValues = parameters.Select(parameter => parameter.HasDefaultValue).ToArray()
+                HasDefaultValues = parameters.Select(parameter => parameter.HasDefaultValue).ToArray(),
+                FromServices = parameters.Select(IsFromServices).ToArray()
             };
             foreach (var parameter in parameters)
                 wsMethod.Parameters.Add(parameter);
 
             controller.Methods.Add(wsMethod);
-        }
-
-        static Func<WebSocketHub, WsUserInfo, ILogger, object> CompileControllerFactory(ConstructorInfo constructor)
-        {
-            var hub = Expression.Parameter(typeof(WebSocketHub), "hub");
-            var user = Expression.Parameter(typeof(WsUserInfo), "user");
-            var logger = Expression.Parameter(typeof(ILogger), "logger");
-            var parameters = constructor.GetParameters();
-            var create = Expression.New(constructor,
-                Expression.Convert(hub, parameters[0].ParameterType),
-                Expression.Convert(user, parameters[1].ParameterType),
-                Expression.Convert(logger, parameters[2].ParameterType));
-            return Expression.Lambda<Func<WebSocketHub, WsUserInfo, ILogger, object>>(
-                Expression.Convert(create, typeof(object)), hub, user, logger).Compile();
         }
 
         static Func<object, object[], Task<ResponseModel>> CompileMethodInvoker(MethodInfo method)
@@ -239,6 +232,12 @@ public static class WebSocketHubExtensions
             var call = Expression.Call(Expression.Convert(target, method.DeclaringType!), method,
                 convertedArguments);
             return Expression.Lambda<Func<object, object[], Task<ResponseModel>>>(call, target, arguments).Compile();
+        }
+
+        static bool IsFromServices(ParameterInfo parameter)
+        {
+            return parameter.GetCustomAttributes(inherit: true).Any(attribute =>
+                attribute.GetType().FullName == "Microsoft.AspNetCore.Mvc.FromServicesAttribute");
         }
     }
 
