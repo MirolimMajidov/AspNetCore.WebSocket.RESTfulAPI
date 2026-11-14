@@ -2,9 +2,9 @@
 
 internal class Notification
 {
-    public static string WSConnected => "WSConnected";
+    public const string WSConnected = "WSConnected";
 
-    public static string ConnectionAborted => "ConnectionAborted";
+    public const string ConnectionAborted = "ConnectionAborted";
 
-    public static string UserUnAuth => "User.UnAuth";
+    public const string UserUnAuth = "User.UnAuth";
 }

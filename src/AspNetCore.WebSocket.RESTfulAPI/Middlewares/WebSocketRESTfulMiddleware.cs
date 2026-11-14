@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.IO;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -161,12 +162,29 @@ public static class WebSocketHubExtensions
             .ToList();
         foreach (var controller in controllers)
             CreateController(controller);
+        wsHub.InitializeEndpoints();
 
         return builder.Map(path, (app) => app.UseMiddleware<TMiddleware>(serviceProvider.GetService<TWebSocketHub>()));
 
         void CreateController(Type controller)
         {
-            var wsController = new WsController { Name = controller.Name[..^10], Controller = controller };
+            var constructor = controller.GetConstructors().SingleOrDefault(candidate =>
+            {
+                var parameters = candidate.GetParameters();
+                return parameters.Length == 3 &&
+                       parameters[0].ParameterType.IsAssignableFrom(typeof(TWebSocketHub)) &&
+                       typeof(WsUserInfo).IsAssignableFrom(parameters[1].ParameterType) &&
+                       parameters[2].ParameterType.IsAssignableFrom(typeof(ILogger));
+            }) ?? throw new InvalidOperationException(
+                $"WebSocket controller '{controller.FullName}' must have exactly one public constructor " +
+                $"compatible with ({typeof(TWebSocketHub).Name}, {nameof(WsUserInfo)}, {nameof(ILogger)}).");
+
+            var wsController = new WsController
+            {
+                Name = controller.Name[..^10],
+                Controller = controller,
+                Factory = CompileControllerFactory(constructor)
+            };
             var methods = controller.GetMethods().Where(m => m.GetWsHubAttribute() != null);
             foreach (var method in methods)
                 CreateMethod(wsController, method);
@@ -176,11 +194,51 @@ public static class WebSocketHubExtensions
 
         void CreateMethod(WsController controller, MethodInfo method)
         {
-            var wsMethod = new WsMethod { Name = method.GetWsHubAttribute().Name, Method = method };
-            foreach (var parameter in method.GetParameters())
+            if (method.ReturnType != typeof(Task<ResponseModel>))
+                throw new InvalidOperationException(
+                    $"WebSocket endpoint '{method.DeclaringType?.FullName}.{method.Name}' must return Task<ResponseModel>.");
+
+            var parameters = method.GetParameters();
+            var wsMethod = new WsMethod
+            {
+                Name = method.GetWsHubAttribute().Name,
+                Method = method,
+                InvokeAsync = CompileMethodInvoker(method),
+                ParameterNames = parameters.Select(parameter => parameter.Name!).ToArray(),
+                ParameterTypes = parameters.Select(parameter => parameter.ParameterType).ToArray(),
+                DefaultValues = parameters.Select(parameter => parameter.DefaultValue).ToArray(),
+                HasDefaultValues = parameters.Select(parameter => parameter.HasDefaultValue).ToArray()
+            };
+            foreach (var parameter in parameters)
                 wsMethod.Parameters.Add(parameter);
 
             controller.Methods.Add(wsMethod);
+        }
+
+        static Func<WebSocketHub, WsUserInfo, ILogger, object> CompileControllerFactory(ConstructorInfo constructor)
+        {
+            var hub = Expression.Parameter(typeof(WebSocketHub), "hub");
+            var user = Expression.Parameter(typeof(WsUserInfo), "user");
+            var logger = Expression.Parameter(typeof(ILogger), "logger");
+            var parameters = constructor.GetParameters();
+            var create = Expression.New(constructor,
+                Expression.Convert(hub, parameters[0].ParameterType),
+                Expression.Convert(user, parameters[1].ParameterType),
+                Expression.Convert(logger, parameters[2].ParameterType));
+            return Expression.Lambda<Func<WebSocketHub, WsUserInfo, ILogger, object>>(
+                Expression.Convert(create, typeof(object)), hub, user, logger).Compile();
+        }
+
+        static Func<object, object[], Task<ResponseModel>> CompileMethodInvoker(MethodInfo method)
+        {
+            var target = Expression.Parameter(typeof(object), "target");
+            var arguments = Expression.Parameter(typeof(object[]), "arguments");
+            var convertedArguments = method.GetParameters()
+                .Select((parameter, index) => Expression.Convert(
+                    Expression.ArrayIndex(arguments, Expression.Constant(index)), parameter.ParameterType));
+            var call = Expression.Call(Expression.Convert(target, method.DeclaringType!), method,
+                convertedArguments);
+            return Expression.Lambda<Func<object, object[], Task<ResponseModel>>>(call, target, arguments).Compile();
         }
     }
 

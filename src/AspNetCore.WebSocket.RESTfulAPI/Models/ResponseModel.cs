@@ -114,6 +114,19 @@ public class ResponseModel
             return null;
         }
     }
+
+    internal static byte[] GenerateJsonBytes(object value, ILogger logger = null)
+    {
+        try
+        {
+            return JsonSerializer.SerializeToUtf8Bytes(value, JsonOptions);
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "An error occurred while serializing a WebSocket response");
+            return null;
+        }
+    }
 }
 
 public static class RequestModelExtensions

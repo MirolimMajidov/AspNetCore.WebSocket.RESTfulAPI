@@ -27,12 +27,7 @@ public static class HelperExtensions
             if (value == null || value is DBNull) return null;
 
             if (value is JsonElement jsonElement)
-                return JsonSerializer.Deserialize(jsonElement.GetRawText(), typeTo,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                        Converters = { new JsonStringEnumConverter() }
-                    });
+                return JsonSerializer.Deserialize(jsonElement, typeTo, ResponseModel.JsonOptions);
 
             if (typeTo.IsEnum)
             {
