@@ -15,13 +15,16 @@ public class WsMethod
 
     internal Func<object, object[], Task<ResponseModel>> InvokeAsync { get; set; }
 
-    internal string[] ParameterNames { get; set; }
+    internal WsParameterBinding[] Bindings { get; set; }
 
-    internal Type[] ParameterTypes { get; set; }
+    #region Nested Types
 
-    internal object[] DefaultValues { get; set; }
+    internal readonly record struct WsParameterBinding(
+        string Name,
+        Type Type,
+        object DefaultValue,
+        bool HasDefaultValue,
+        bool FromServices);
 
-    internal bool[] HasDefaultValues { get; set; }
-
-    internal bool[] FromServices { get; set; }
+    #endregion
 }

@@ -205,11 +205,12 @@ public static class WebSocketHubExtensions
                 Name = method.GetWsHubAttribute().Name,
                 Method = method,
                 InvokeAsync = CompileMethodInvoker(method),
-                ParameterNames = parameters.Select(parameter => parameter.Name!).ToArray(),
-                ParameterTypes = parameters.Select(parameter => parameter.ParameterType).ToArray(),
-                DefaultValues = parameters.Select(parameter => parameter.DefaultValue).ToArray(),
-                HasDefaultValues = parameters.Select(parameter => parameter.HasDefaultValue).ToArray(),
-                FromServices = parameters.Select(IsFromServices).ToArray()
+                Bindings = parameters.Select(parameter => new WsMethod.WsParameterBinding(
+                    parameter.Name!,
+                    parameter.ParameterType,
+                    parameter.DefaultValue,
+                    parameter.HasDefaultValue,
+                    IsFromServices(parameter))).ToArray()
             };
             foreach (var parameter in parameters)
                 wsMethod.Parameters.Add(parameter);

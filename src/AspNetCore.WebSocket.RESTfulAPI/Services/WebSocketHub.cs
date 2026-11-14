@@ -202,26 +202,27 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                     if (_endpointsByName.TryGetValue(requestMethod, out var endpoint))
                     {
                         using var requestScope = Manager.CreateScope();
-                        var parameterCount = endpoint.Method.ParameterNames.Length;
+                        var parameterCount = endpoint.Method.Bindings.Length;
                         var methodParams = ArrayPool<object>.Shared.Rent(parameterCount);
                         try
                         {
                             for (var index = 0; index < parameterCount; index++)
                             {
-                                parameterName = endpoint.Method.ParameterNames[index];
-                                if (endpoint.Method.FromServices[index])
+                                var binding = endpoint.Method.Bindings[index];
+                                parameterName = binding.Name;
+                                if (binding.FromServices)
                                 {
                                     methodParams[index] = requestScope.ServiceProvider.GetRequiredService(
-                                        endpoint.Method.ParameterTypes[index]);
+                                        binding.Type);
                                 }
                                 else if (requestModel.Params != null &&
                                          requestModel.Params.TryGetValue(parameterName, out var value))
                                 {
-                                    methodParams[index] = value.ConvertTo(endpoint.Method.ParameterTypes[index]);
+                                    methodParams[index] = value.ConvertTo(binding.Type);
                                 }
-                                else if (endpoint.Method.HasDefaultValues[index])
+                                else if (binding.HasDefaultValue)
                                 {
-                                    methodParams[index] = endpoint.Method.DefaultValues[index];
+                                    methodParams[index] = binding.DefaultValue;
                                 }
                                 else
                                 {
@@ -290,14 +291,14 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                     WebSocketErrorCodes.InvalidParameters);
             }
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException ex) when (!executingMethod)
         {
             logger.LogWarning(ex, "Invalid parameters for WebSocket method {Method}", requestMethod);
             responseModel = ResponseModel.ErrorRequest(
                 $"Parameters for method '{requestMethod}' are missing or invalid. Check parameter '{parameterName}'.",
                 WebSocketErrorCodes.InvalidParameters);
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException ex) when (!executingMethod)
         {
             logger.LogError(ex, "Invalid WebSocket method configuration for {Method}", requestMethod);
             responseModel = ResponseModel.ErrorRequest(
