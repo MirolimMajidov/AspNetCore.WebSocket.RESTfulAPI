@@ -5,6 +5,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Runtime.CompilerServices;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using AspNetCore.WebSocket.RESTfulAPI.Helpers;
@@ -133,6 +134,8 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
         ResponseModel responseModel;
         string requestId = string.Empty;
         string requestMethod = string.Empty;
+        string parameterName = null;
+        bool executingMethod = false;
         Guid? userId = null;
         try
         {
@@ -149,13 +152,20 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
             requestMethod = requestModel.Method;
             if (userInfo == null)
             {
-                responseModel = await ResponseModel.NoAccessAsync(errorId: 105);
+                responseModel = ResponseModel.ErrorRequest(
+                    "The WebSocket connection is not registered or is no longer authenticated.", 105);
             }
             else
             {
-                if (string.IsNullOrEmpty(requestId) || string.IsNullOrEmpty(requestMethod))
+                if (string.IsNullOrWhiteSpace(requestId))
                 {
-                    responseModel = await ResponseModel.NoAccessAsync(errorId: 102);
+                    responseModel = ResponseModel.ErrorRequest(
+                        "The required request property 'id' is missing or empty.", 102);
+                }
+                else if (string.IsNullOrWhiteSpace(requestMethod))
+                {
+                    responseModel = ResponseModel.ErrorRequest(
+                        "The required request property 'method' is missing or empty.", 102);
                 }
                 else
                 {
@@ -173,43 +183,118 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                                 for (var index = 0; index < wsHubMethod.Parameters.Count; index++)
                                 {
                                     var parameter = wsHubMethod.Parameters[index];
-                                    methodParams[index] = requestModel.Params != null &&
-                                                          requestModel.Params.TryGetValue(parameter.Name!, out var value)
-                                        ? value.ConvertTo(parameter.ParameterType)
-                                        : parameter.DefaultValue;
+                                    parameterName = parameter.Name;
+                                    if (requestModel.Params != null &&
+                                        requestModel.Params.TryGetValue(parameter.Name!, out var value))
+                                    {
+                                        methodParams[index] = value.ConvertTo(parameter.ParameterType);
+                                    }
+                                    else if (parameter.HasDefaultValue)
+                                    {
+                                        methodParams[index] = parameter.DefaultValue;
+                                    }
+                                    else
+                                    {
+                                        throw new ArgumentException(
+                                            $"Required parameter '{parameter.Name}' is missing.", parameter.Name);
+                                    }
                                 }
 
                                 var callingClass =
-                                    Activator.CreateInstance(controller.Controller, this, userInfo, logger);
-                                responseModel =
-                                    await ((Task<ResponseModel>)wsHubMethod.Method.Invoke(callingClass, methodParams))!;
+                                    Activator.CreateInstance(controller.Controller, this, userInfo, logger)
+                                    ?? throw new InvalidOperationException(
+                                        $"Controller '{controller.Controller.Name}' could not be created.");
+                                executingMethod = true;
+                                var invocationResult = wsHubMethod.Method.Invoke(callingClass, methodParams);
+                                if (invocationResult is not Task<ResponseModel> responseTask)
+                                    throw new InvalidOperationException(
+                                        $"Method '{requestMethod}' must return Task<ResponseModel>.");
+
+                                responseModel = await responseTask;
+                                if (responseModel == null)
+                                    throw new InvalidOperationException(
+                                        $"Method '{requestMethod}' returned a null response.");
                             }
                             else
                             {
-                                responseModel =
-                                    await ResponseModel.ErrorRequestAsync(
-                                        $"{requestMethod} method's parameters is invalid", 106);
+                                responseModel = ResponseModel.ErrorRequest(
+                                    $"Method '{requestMethod}' was not found. Check the method name and its WsHubMethodName attribute.",
+                                    107);
                             }
                         }
                         else
                         {
-                            responseModel = await ResponseModel.ErrorRequestAsync(
-                                $"{requestMethod} controller is invalid", 104);
+                            responseModel = ResponseModel.ErrorRequest(
+                                $"Controller '{requestMethod[..separatorIndex]}' was not found for method '{requestMethod}'.",
+                                104);
                         }
                     }
                     else
                     {
-                        responseModel =
-                            await ResponseModel.ErrorRequestAsync(
-                                "Websocket request will support only two levels methods", 103);
+                        responseModel = ResponseModel.ErrorRequest(
+                            $"Method '{requestMethod}' has an invalid format. Expected 'Controller.Method'.", 103);
                     }
                 }
             }
         }
+        catch (JsonException ex)
+        {
+            if (executingMethod)
+            {
+                logger.LogError(ex, "WebSocket method {Method} failed", requestMethod);
+                responseModel = CreateSafeServerError(requestMethod);
+            }
+            else
+            {
+                logger.LogWarning(ex, "Invalid WebSocket JSON request for method {Method}", requestMethod);
+                responseModel = ResponseModel.ErrorRequest(
+                    "The request body contains invalid JSON. Check its syntax and property types.", 101);
+            }
+        }
+        catch (InvalidCastException ex)
+        {
+            if (executingMethod)
+            {
+                logger.LogError(ex, "WebSocket method {Method} failed", requestMethod);
+                responseModel = CreateSafeServerError(requestMethod);
+            }
+            else
+            {
+                logger.LogWarning(ex, "Invalid parameter {Parameter} for WebSocket method {Method}", parameterName,
+                    requestMethod);
+                responseModel = ResponseModel.ErrorRequest(
+                    $"Parameter '{parameterName}' has an invalid value or type.", 106);
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            logger.LogWarning(ex, "Invalid parameters for WebSocket method {Method}", requestMethod);
+            responseModel = ResponseModel.ErrorRequest(
+                $"Parameters for method '{requestMethod}' are missing or invalid. Check parameter '{parameterName}'.",
+                106);
+        }
+        catch (MissingMethodException ex)
+        {
+            logger.LogError(ex, "WebSocket controller constructor was not found for method {Method}", requestMethod);
+            responseModel = ResponseModel.ErrorRequest(
+                $"Method '{requestMethod}' is currently unavailable because of a server configuration error.", 108);
+        }
+        catch (TargetInvocationException ex)
+        {
+            var actualException = ex.InnerException ?? ex;
+            logger.LogError(actualException, "WebSocket method {Method} failed", requestMethod);
+            responseModel = CreateSafeServerError(requestMethod);
+        }
+        catch (InvalidOperationException ex)
+        {
+            logger.LogError(ex, "Invalid WebSocket method configuration for {Method}", requestMethod);
+            responseModel = ResponseModel.ErrorRequest(
+                $"Method '{requestMethod}' is currently unavailable because of a server configuration error.", 109);
+        }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Websocket request is invalid");
-            responseModel = await ResponseModel.ErrorRequestAsync("Websocket request is invalid", 101);
+            logger.LogError(ex, "Unhandled error while executing WebSocket method {Method}", requestMethod);
+            responseModel = CreateSafeServerError(requestMethod);
         }
 
         if (responseModel != null)
@@ -225,5 +310,11 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
             await SendMessageAsync(socket, response.GenerateJson(logger), logger: logger, method: response.Method,
                 userId: userId);
         }
+    }
+
+    private static ResponseModel CreateSafeServerError(string requestMethod)
+    {
+        return ResponseModel.ErrorRequest(
+            $"Method '{requestMethod}' could not be completed because of an internal server error.", 110);
     }
 }
