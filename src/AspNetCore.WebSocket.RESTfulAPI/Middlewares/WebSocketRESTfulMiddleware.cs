@@ -170,17 +170,15 @@ public static class WebSocketHubExtensions
         {
             var constructors = controller.GetConstructors()
                 .Select(candidate => (Constructor: candidate, Parameters: candidate.GetParameters()))
-                .Where(candidate => (candidate.Parameters.Length == 2 ||
-                                     candidate.Parameters.Length == 3 &&
-                                     typeof(ILogger).IsAssignableFrom(candidate.Parameters[2].ParameterType)) &&
+                .Where(candidate => candidate.Parameters.Length == 2 &&
                                     candidate.Parameters[0].ParameterType.IsAssignableFrom(typeof(TWebSocketHub)) &&
                                     typeof(WsUserInfo).IsAssignableFrom(candidate.Parameters[1].ParameterType))
                 .ToArray();
             if (constructors.Length != 1)
                 throw new InvalidOperationException(
                     $"WebSocket controller '{controller.FullName}' must have exactly one public constructor with the " +
-                    $"({typeof(TWebSocketHub).Name}, {nameof(WsUserInfo)}) parameters. " +
-                    "All other services must be method parameters marked with [FromServices].");
+                    $"only parameters ({typeof(TWebSocketHub).Name}, {nameof(WsUserInfo)}). " +
+                    "All other services like ILogger must be method parameters marked with [FromServices].");
 
             var constructorParameters = constructors[0].Parameters;
 

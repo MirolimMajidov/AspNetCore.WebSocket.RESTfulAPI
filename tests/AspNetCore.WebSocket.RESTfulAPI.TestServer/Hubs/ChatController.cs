@@ -17,13 +17,11 @@ namespace AspNetCore.WebSocket.RESTfulAPI.TestServer.Hubs
     {
         private readonly WebSocketHub _socketHub;
         private readonly WsUserInfo _wsUserInfo;
-        private readonly ILogger _logger;
 
-        public ChatController(WebSocketHub socketHub, WsUserInfo wsUserInfo, ILogger logger)
+        public ChatController(WebSocketHub socketHub, WsUserInfo wsUserInfo)
         {
             _socketHub = socketHub;
             _wsUserInfo = wsUserInfo;
-            _logger = logger;
         }
 
         [HttpPost("Chat.Message")]

@@ -15,13 +15,11 @@ namespace AspNetCore.WebSocket.RESTfulAPI.JWT.TestServer.Hubs
     {
         private readonly WsHub _socketHub;
         private readonly WsUserInfo _wsUserInfo;
-        private readonly ILogger _logger;
 
-        public UserController(WsHub socketHub, WsUserInfo wsUserInfo, ILogger logger)
+        public UserController(WsHub socketHub, WsUserInfo wsUserInfo)
         {
             _socketHub = socketHub;
             _wsUserInfo = wsUserInfo;
-            _logger = logger;
         }
 
         [HttpGet("User.Info")]
