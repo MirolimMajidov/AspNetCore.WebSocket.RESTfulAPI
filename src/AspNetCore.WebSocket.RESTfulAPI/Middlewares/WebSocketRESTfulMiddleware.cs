@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,10 +70,10 @@ public class WebSocketRESTfulMiddleware
             {
                 await WebSocketHub.OnConnectedAsync(socket, userInfo);
 
-                await Receive(socket, async (result, buffer) =>
+                await Receive(socket, async (messageType, buffer, count) =>
                 {
-                    if (result.MessageType == WebSocketMessageType.Binary)
-                        await WebSocketHub.ReceiveMessageAsync(socket, Encoding.UTF8.GetString(buffer, 0, result.Count));
+                    if (messageType == WebSocketMessageType.Binary)
+                        await WebSocketHub.ReceiveMessageAsync(socket, Encoding.UTF8.GetString(buffer, 0, count));
                     else
                         await WebSocketHub.OnDisconnectedAsync(userInfo.Id);
                 });
@@ -86,15 +87,33 @@ public class WebSocketRESTfulMiddleware
         }
     }
 
-    private async Task Receive(System.Net.WebSockets.WebSocket socket, Action<WebSocketReceiveResult, byte[]> handleMessage)
+    private async Task Receive(System.Net.WebSockets.WebSocket socket,
+        Func<WebSocketMessageType, byte[], int, Task> handleMessage)
     {
         try
         {
             var buffer = new byte[WebSocketManager.WebSocketBufferSize];
             while (socket.State == WebSocketState.Open)
             {
-                var result = await socket.ReceiveAsync(buffer: new ArraySegment<byte>(buffer), cancellationToken: CancellationToken.None);
-                handleMessage(result, buffer);
+                var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                if (result.MessageType == WebSocketMessageType.Close || result.EndOfMessage)
+                {
+                    await handleMessage(result.MessageType, buffer, result.Count);
+                    continue;
+                }
+
+                using var message = new MemoryStream(result.Count + buffer.Length);
+                message.Write(buffer, 0, result.Count);
+                do
+                {
+                    result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    if (result.MessageType == WebSocketMessageType.Close)
+                        break;
+                    message.Write(buffer, 0, result.Count);
+                } while (!result.EndOfMessage);
+
+                var completeMessage = message.ToArray();
+                await handleMessage(result.MessageType, completeMessage, completeMessage.Length);
             }
         }
         catch

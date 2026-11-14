@@ -23,7 +23,7 @@ public class ResponseModel
 
     internal static JsonSerializerOptions JsonOptions { get; } = new()
     {
-        WriteIndented = true,
+        WriteIndented = false,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
@@ -48,9 +48,9 @@ public class ResponseModel
     /// <param name="error">Message of error</param>
     /// <param name="errorId">Id of error</param>
     /// <returns>Created model</returns>
-    public static async Task<ResponseModel> ErrorRequestAsync(string error = "error", int errorId = 400)
+    public static Task<ResponseModel> ErrorRequestAsync(string error = "error", int errorId = 400)
     {
-        return await Task.Run(() => ErrorRequest(error, errorId));
+        return Task.FromResult(ErrorRequest(error, errorId));
     }
 
     /// <summary>
@@ -69,9 +69,9 @@ public class ResponseModel
     /// </summary>
     /// <param name="result">Data to transfer the client</param>
     /// <returns>Created model</returns>
-    public static async Task<ResponseModel> SuccessRequestAsync(object result = null)
+    public static Task<ResponseModel> SuccessRequestAsync(object result = null)
     {
-        return await Task.Run(() => SuccessRequest(result));
+        return Task.FromResult(SuccessRequest(result));
     }
 
     /// <summary>
@@ -89,9 +89,9 @@ public class ResponseModel
     /// </summary>
     /// <param name="errorId">Id of error</param>
     /// <returns>Created model</returns>
-    public static async Task<ResponseModel> NoAccessAsync(int errorId = 401)
+    public static Task<ResponseModel> NoAccessAsync(int errorId = 401)
     {
-        return await Task.Run(() => NoAccess(errorId));
+        return Task.FromResult(NoAccess(errorId));
     }
 
     /// <summary>

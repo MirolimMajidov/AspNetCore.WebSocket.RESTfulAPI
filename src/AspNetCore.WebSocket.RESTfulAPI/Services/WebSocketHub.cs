@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using AspNetCore.WebSocket.RESTfulAPI.Helpers;
@@ -14,6 +15,8 @@ namespace AspNetCore.WebSocket.RESTfulAPI.Services;
 
 public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logger) : Disposable
 {
+    private static readonly ConditionalWeakTable<System.Net.WebSockets.WebSocket, SemaphoreSlim> SendLocks = new();
+    private IReadOnlyDictionary<string, WsController> _controllersByName;
     public IWebSocketManager Manager { get; } = manager;
 
     /// <summary>
@@ -51,22 +54,30 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
     public static async Task SendMessageAsync(System.Net.WebSockets.WebSocket socket, string responseMessage,
         ILogger logger, string method = "", Guid? userId = null)
     {
+        if (socket?.State != WebSocketState.Open || responseMessage == null)
+            return;
+
+        var sendLock = SendLocks.GetValue(socket, static _ => new SemaphoreSlim(1, 1));
+        await sendLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            if (socket?.State == WebSocketState.Open)
+            if (socket.State == WebSocketState.Open)
             {
                 if (WebSocketManager.LogAllWsRequest && logger != null)
                     logger.LogInformation($"User id: {userId}, Method: {method}, Response data: {responseMessage}");
 
                 var bufferContent = Encoding.UTF8.GetBytes(responseMessage);
-                var buffer = new ArraySegment<byte>(array: bufferContent, offset: 0, count: bufferContent.Length);
-                await socket.SendAsync(buffer: buffer, messageType: WebSocketMessageType.Binary, endOfMessage: true,
-                    cancellationToken: CancellationToken.None);
+                await socket.SendAsync(bufferContent, WebSocketMessageType.Binary, true, CancellationToken.None)
+                    .ConfigureAwait(false);
             }
         }
         catch
         {
             // ignored
+        }
+        finally
+        {
+            sendLock.Release();
         }
     }
 
@@ -108,9 +119,8 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
     public async Task SendNotificationAsync(IEnumerable<Guid> userIds, object responseData, string method)
     {
         var responseMessage = NotificationResponseModel.SendNotification(responseData, method).GenerateJson(logger);
-        foreach (var socketId in userIds)
-            await SendMessageAsync(Manager.GetWebSocket(socketId), responseMessage: responseMessage, method: method,
-                userId: socketId, logger: logger);
+        await Task.WhenAll(userIds.Select(socketId =>
+            SendMessageAsync(Manager.GetWebSocket(socketId), responseMessage, logger, method, socketId)));
     }
 
     /// <summary>
@@ -149,30 +159,24 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                 }
                 else
                 {
-                    var methodLevels = requestMethod.Split('.');
-                    if (methodLevels.Length == 2)
+                    var separatorIndex = requestMethod.IndexOf('.');
+                    if (separatorIndex > 0 && separatorIndex == requestMethod.LastIndexOf('.'))
                     {
-                        var controller = Manager.Controllers.FirstOrDefault(c => c.Name == methodLevels.First());
+                        _controllersByName ??= Manager.Controllers.ToDictionary(c => c.Name, StringComparer.Ordinal);
+                        _controllersByName.TryGetValue(requestMethod[..separatorIndex], out var controller);
                         if (controller != null)
                         {
                             var wsHubMethod = controller.Methods.FirstOrDefault(m => m.Name == requestModel.Method);
                             if (wsHubMethod != null)
                             {
-                                var paramsLength = requestModel.Params?.Count ?? 0;
-                                object[] methodParams = null;
-                                if (paramsLength >= 0)
+                                var methodParams = new object[wsHubMethod.Parameters.Count];
+                                for (var index = 0; index < wsHubMethod.Parameters.Count; index++)
                                 {
-                                    var parameters = new List<object>();
-                                    foreach (var parameter in wsHubMethod.Parameters)
-                                    {
-                                        var paramName = parameter!.Name!;
-                                        var value = requestModel.Params!.ContainsKey(paramName)
-                                            ? requestModel.Params[paramName].ConvertTo(parameter.ParameterType)
-                                            : parameter.DefaultValue;
-                                        parameters.Add(value);
-                                    }
-
-                                    methodParams = parameters.ToArray();
+                                    var parameter = wsHubMethod.Parameters[index];
+                                    methodParams[index] = requestModel.Params != null &&
+                                                          requestModel.Params.TryGetValue(parameter.Name!, out var value)
+                                        ? value.ConvertTo(parameter.ParameterType)
+                                        : parameter.DefaultValue;
                                 }
 
                                 var callingClass =
@@ -190,7 +194,7 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                         else
                         {
                             responseModel = await ResponseModel.ErrorRequestAsync(
-                                $"{requestMethod} method of {methodLevels.First()} class is invalid", 104);
+                                $"{requestMethod} controller is invalid", 104);
                         }
                     }
                     else

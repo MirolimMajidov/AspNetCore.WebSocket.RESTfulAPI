@@ -13,6 +13,7 @@ using System.Net.WebSockets;
 public class WebSocketManager(ILogger<WebSocketManager> logger) : Disposable, IWebSocketManager
 {
     private readonly ConcurrentDictionary<Guid, (WebSocket WS, WsUserInfo Info)> _sockets = new();
+    private readonly ConcurrentDictionary<WebSocket, Guid> _socketIds = new();
 
     public static bool LogAllWsRequest { get; set; }
     public static int WebSocketBufferSize { get; set; }
@@ -22,12 +23,15 @@ public class WebSocketManager(ILogger<WebSocketManager> logger) : Disposable, IW
 
     public WebSocket GetWebSocket(Guid socketId)
     {
-        return _sockets.FirstOrDefault(p => p.Key == socketId).Value.WS;
+        return _sockets.TryGetValue(socketId, out var socketInfo) ? socketInfo.WS : null;
     }
 
     public WsUserInfo GetUserInfo(WebSocket socket)
     {
-        return _sockets.FirstOrDefault(p => p.Value.WS == socket).Value.Info;
+        return _socketIds.TryGetValue(socket, out var socketId) &&
+               _sockets.TryGetValue(socketId, out var socketInfo)
+            ? socketInfo.Info
+            : null;
     }
 
     public ConcurrentDictionary<Guid, (WebSocket WS, WsUserInfo Info)> Clients()
@@ -47,21 +51,20 @@ public class WebSocketManager(ILogger<WebSocketManager> logger) : Disposable, IW
 
     public Guid GetId(WebSocket socket)
     {
-        return _sockets.FirstOrDefault(p => p.Value.WS == socket).Key;
+        return _socketIds.TryGetValue(socket, out var socketId) ? socketId : Guid.Empty;
     }
 
-    public async Task AddSocket(Guid socketId, WebSocket socket, WsUserInfo info)
+    public Task AddSocket(Guid socketId, WebSocket socket, WsUserInfo info)
     {
-        await Task.Run(() => { _sockets.TryAdd(socketId, (socket, info)); });
+        if (_sockets.TryAdd(socketId, (socket, info)))
+            _socketIds.TryAdd(socket, socketId);
+
+        return Task.CompletedTask;
     }
 
     public void ClearAllClients()
     {
-        Task.Run(async () =>
-        {
-            foreach (var client in _sockets)
-                await RemoveSocket(client.Key);
-        });
+        _ = ClearAllClientsAsync();
     }
 
     public async Task RemoveWebSocketBeforeReconnect(Guid socketId)
@@ -86,6 +89,7 @@ public class WebSocketManager(ILogger<WebSocketManager> logger) : Disposable, IW
     {
         if (_sockets.TryRemove(socketId, out var socketInfo))
         {
+            _socketIds.TryRemove(socketInfo.WS, out _);
             try
             {
                 var description = becauseClause == null ? closeDescription : $"{closeDescription} because {becauseClause}";
@@ -111,5 +115,10 @@ public class WebSocketManager(ILogger<WebSocketManager> logger) : Disposable, IW
                 socketInfo.Info?.Dispose();
             }
         }
+    }
+
+    private async Task ClearAllClientsAsync()
+    {
+        await Task.WhenAll(_sockets.Keys.Select(socketId => RemoveSocket(socketId)));
     }
 }
