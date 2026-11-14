@@ -14,7 +14,7 @@ using System.Net.WebSockets;
 public class WebSocketManager(ILogger<WebSocketManager> logger, IServiceScopeFactory scopeFactory) : Disposable, IWebSocketManager
 {
     private readonly ConcurrentDictionary<Guid, (WebSocket WS, WsUserInfo Info)> _sockets = new();
-    private readonly ConcurrentDictionary<WebSocket, Guid> _socketIds = new();
+    private readonly ConcurrentDictionary<WebSocket, (Guid Id, WsUserInfo Info)> _socketsByInstance = new();
 
     public static bool LogAllWsRequest { get; set; }
     public static int WebSocketBufferSize { get; set; }
@@ -31,10 +31,7 @@ public class WebSocketManager(ILogger<WebSocketManager> logger, IServiceScopeFac
 
     public WsUserInfo GetUserInfo(WebSocket socket)
     {
-        return _socketIds.TryGetValue(socket, out var socketId) &&
-               _sockets.TryGetValue(socketId, out var socketInfo)
-            ? socketInfo.Info
-            : null;
+        return _socketsByInstance.TryGetValue(socket, out var socketInfo) ? socketInfo.Info : null;
     }
 
     public ConcurrentDictionary<Guid, (WebSocket WS, WsUserInfo Info)> Clients()
@@ -54,13 +51,13 @@ public class WebSocketManager(ILogger<WebSocketManager> logger, IServiceScopeFac
 
     public Guid GetId(WebSocket socket)
     {
-        return _socketIds.TryGetValue(socket, out var socketId) ? socketId : Guid.Empty;
+        return _socketsByInstance.TryGetValue(socket, out var socketInfo) ? socketInfo.Id : Guid.Empty;
     }
 
     public Task AddSocket(Guid socketId, WebSocket socket, WsUserInfo info)
     {
         if (_sockets.TryAdd(socketId, (socket, info)))
-            _socketIds.TryAdd(socket, socketId);
+            _socketsByInstance.TryAdd(socket, (socketId, info));
 
         return Task.CompletedTask;
     }
@@ -92,7 +89,7 @@ public class WebSocketManager(ILogger<WebSocketManager> logger, IServiceScopeFac
     {
         if (_sockets.TryRemove(socketId, out var socketInfo))
         {
-            _socketIds.TryRemove(socketInfo.WS, out _);
+            _socketsByInstance.TryRemove(socketInfo.WS, out _);
             try
             {
                 var description = becauseClause == null ? closeDescription : $"{closeDescription} because {becauseClause}";

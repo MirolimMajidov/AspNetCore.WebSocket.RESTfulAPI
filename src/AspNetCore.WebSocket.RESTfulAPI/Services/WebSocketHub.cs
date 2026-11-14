@@ -5,9 +5,9 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Runtime.CompilerServices;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Buffers;
 using AspNetCore.WebSocket.RESTfulAPI.Helpers;
 using AspNetCore.WebSocket.RESTfulAPI.Models;
 using Microsoft.Extensions.Logging;
@@ -151,7 +151,11 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
     /// </summary>
     /// <param name="socket">WebSocket which receive message</param>
     /// <param name="receiveMessageData">Receive message data from user</param>
-    public async Task ReceiveMessageAsync(System.Net.WebSockets.WebSocket socket, string receiveMessageData)
+    public Task ReceiveMessageAsync(System.Net.WebSockets.WebSocket socket, string receiveMessageData)
+        => ReceiveMessageAsync(socket, Encoding.UTF8.GetBytes(receiveMessageData));
+
+    internal async Task ReceiveMessageAsync(System.Net.WebSockets.WebSocket socket,
+        ReadOnlyMemory<byte> receiveMessageData)
     {
         ResponseModel responseModel;
         string requestId = string.Empty;
@@ -161,14 +165,14 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
         Guid? userId = null;
         try
         {
-            var requestModel = JsonSerializer.Deserialize<NotificationResponseModel>(receiveMessageData,
+            var requestModel = JsonSerializer.Deserialize<WebSocketRequest>(receiveMessageData.Span,
                 ResponseModel.JsonOptions) ?? throw new JsonException("The WebSocket request body is empty.");
             var userInfo = Manager.GetUserInfo(socket);
             userId = userInfo?.Id;
 
             if (WebSocketManager.LogAllWsRequest)
-                logger.LogInformation(
-                    $"User id: {userId}, Method: {requestModel.Method}, Request data: {receiveMessageData}");
+                logger.LogInformation("User id: {UserId}, Method: {Method}, Request data: {RequestData}",
+                    userId, requestModel.Method, Encoding.UTF8.GetString(receiveMessageData.Span));
 
             requestId = requestModel.Id;
             requestMethod = requestModel.Method;
@@ -195,14 +199,14 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
 
                 else
                 {
-                    var separatorIndex = requestMethod.IndexOf('.');
-                    if (separatorIndex > 0 && separatorIndex == requestMethod.LastIndexOf('.'))
+                    if (_endpointsByName.TryGetValue(requestMethod, out var endpoint))
                     {
-                        if (_endpointsByName.TryGetValue(requestMethod, out var endpoint))
+                        using var requestScope = Manager.CreateScope();
+                        var parameterCount = endpoint.Method.ParameterNames.Length;
+                        var methodParams = ArrayPool<object>.Shared.Rent(parameterCount);
+                        try
                         {
-                            using var requestScope = Manager.CreateScope();
-                            var methodParams = new object[endpoint.Method.ParameterNames.Length];
-                            for (var index = 0; index < endpoint.Method.ParameterNames.Length; index++)
+                            for (var index = 0; index < parameterCount; index++)
                             {
                                 parameterName = endpoint.Method.ParameterNames[index];
                                 if (endpoint.Method.FromServices[index])
@@ -211,7 +215,7 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                                         endpoint.Method.ParameterTypes[index]);
                                 }
                                 else if (requestModel.Params != null &&
-                                    requestModel.Params.TryGetValue(parameterName, out var value))
+                                         requestModel.Params.TryGetValue(parameterName, out var value))
                                 {
                                     methodParams[index] = value.ConvertTo(endpoint.Method.ParameterTypes[index]);
                                 }
@@ -226,8 +230,7 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                                 }
                             }
 
-                            var callingClass = endpoint.Controller.Factory(requestScope.ServiceProvider,
-                                [this, userInfo]);
+                            var callingClass = endpoint.Controller.Factory(this, userInfo);
                             using var controllerLifetime = callingClass as IDisposable;
                             executingMethod = true;
                             responseModel = await endpoint.Method.InvokeAsync(callingClass, methodParams);
@@ -235,17 +238,23 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
                                 throw new InvalidOperationException(
                                     $"Method '{requestMethod}' returned a null response.");
                         }
-                        else
+                        finally
                         {
-                            responseModel = ResponseModel.ErrorRequest(
-                                $"Method '{requestMethod}' was not found.", WebSocketErrorCodes.MethodNotFound);
+                            Array.Clear(methodParams, 0, parameterCount);
+                            ArrayPool<object>.Shared.Return(methodParams);
                         }
                     }
                     else
                     {
-                        responseModel = ResponseModel.ErrorRequest(
-                            $"Method '{requestMethod}' has an invalid format. Expected 'Controller.Method'.",
-                            WebSocketErrorCodes.InvalidMethodFormat);
+                        var separatorIndex = requestMethod.IndexOf('.');
+                        var validFormat = separatorIndex > 0 && separatorIndex == requestMethod.LastIndexOf('.') &&
+                                          separatorIndex < requestMethod.Length - 1;
+                        responseModel = validFormat
+                            ? ResponseModel.ErrorRequest($"Method '{requestMethod}' was not found.",
+                                WebSocketErrorCodes.MethodNotFound)
+                            : ResponseModel.ErrorRequest(
+                                $"Method '{requestMethod}' has an invalid format. Expected 'Controller.Method'.",
+                                WebSocketErrorCodes.InvalidMethodFormat);
                     }
                 }
             }
@@ -287,19 +296,6 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
             responseModel = ResponseModel.ErrorRequest(
                 $"Parameters for method '{requestMethod}' are missing or invalid. Check parameter '{parameterName}'.",
                 WebSocketErrorCodes.InvalidParameters);
-        }
-        catch (MissingMethodException ex)
-        {
-            logger.LogError(ex, "WebSocket controller constructor was not found for method {Method}", requestMethod);
-            responseModel = ResponseModel.ErrorRequest(
-                $"Method '{requestMethod}' is currently unavailable because of a server configuration error.",
-                WebSocketErrorCodes.ControllerActivationFailed);
-        }
-        catch (TargetInvocationException ex)
-        {
-            var actualException = ex.InnerException ?? ex;
-            logger.LogError(actualException, "WebSocket method {Method} failed", requestMethod);
-            responseModel = CreateSafeServerError(requestMethod);
         }
         catch (InvalidOperationException ex)
         {

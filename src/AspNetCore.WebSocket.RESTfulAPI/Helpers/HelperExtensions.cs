@@ -65,4 +65,19 @@ public static class HelperExtensions
             throw new InvalidCastException($"The server couldn't cast '{value}' object to '{typeTo.Name}' type. Error: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// Deserializes a JSON request parameter to its cached endpoint type.
+    /// </summary>
+    public static object ConvertTo(this JsonElement value, Type typeTo)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize(value, typeTo, ResponseModel.JsonOptions);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidCastException("The request parameter could not be converted to the required type.", ex);
+        }
+    }
 }

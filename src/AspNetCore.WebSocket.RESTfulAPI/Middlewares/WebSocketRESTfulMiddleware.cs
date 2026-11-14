@@ -4,7 +4,6 @@ using System.Net.WebSockets;
 using System.Reflection;
 using System.IO;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AspNetCore.WebSocket.RESTfulAPI.Configurations;
@@ -74,7 +73,8 @@ public class WebSocketRESTfulMiddleware
                 await Receive(socket, async (messageType, buffer, count) =>
                 {
                     if (messageType == WebSocketMessageType.Binary)
-                        await WebSocketHub.ReceiveMessageAsync(socket, Encoding.UTF8.GetString(buffer, 0, count));
+                        await WebSocketHub.ReceiveMessageAsync(socket,
+                            new ReadOnlyMemory<byte>(buffer, 0, count));
                     else
                         await WebSocketHub.OnDisconnectedAsync(userInfo.Id);
                 });
@@ -180,14 +180,11 @@ public static class WebSocketHubExtensions
                     $"only parameters ({typeof(TWebSocketHub).Name}, {nameof(WsUserInfo)}). " +
                     "All other services like ILogger must be method parameters marked with [FromServices].");
 
-            var constructorParameters = constructors[0].Parameters;
-
             var wsController = new WsController
             {
                 Name = controller.Name[..^10],
                 Controller = controller,
-                Factory = ActivatorUtilities.CreateFactory(controller,
-                    [constructorParameters[0].ParameterType, constructorParameters[1].ParameterType])
+                Factory = CompileControllerFactory(constructors[0].Constructor)
             };
             var methods = controller.GetMethods().Where(m => m.GetWsHubAttribute() != null);
             foreach (var method in methods)
@@ -230,6 +227,18 @@ public static class WebSocketHubExtensions
             var call = Expression.Call(Expression.Convert(target, method.DeclaringType!), method,
                 convertedArguments);
             return Expression.Lambda<Func<object, object[], Task<ResponseModel>>>(call, target, arguments).Compile();
+        }
+
+        static Func<WebSocketHub, WsUserInfo, object> CompileControllerFactory(ConstructorInfo constructor)
+        {
+            var hub = Expression.Parameter(typeof(WebSocketHub), "hub");
+            var userInfo = Expression.Parameter(typeof(WsUserInfo), "userInfo");
+            var constructorParameters = constructor.GetParameters();
+            var create = Expression.New(constructor,
+                Expression.Convert(hub, constructorParameters[0].ParameterType),
+                Expression.Convert(userInfo, constructorParameters[1].ParameterType));
+            return Expression.Lambda<Func<WebSocketHub, WsUserInfo, object>>(
+                Expression.Convert(create, typeof(object)), hub, userInfo).Compile();
         }
 
         static bool IsFromServices(ParameterInfo parameter)

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
+using AspNetCore.WebSocket.RESTfulAPI.Services;
 
 namespace AspNetCore.WebSocket.RESTfulAPI.Models;
 
@@ -12,5 +12,5 @@ public class WsController
 
     public List<WsMethod> Methods { get; set; } = [];
 
-    internal ObjectFactory Factory { get; set; }
+    internal Func<WebSocketHub, WsUserInfo, object> Factory { get; set; }
 }
