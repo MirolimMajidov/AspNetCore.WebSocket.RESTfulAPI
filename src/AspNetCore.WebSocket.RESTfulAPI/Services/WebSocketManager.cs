@@ -76,7 +76,7 @@ public class WebSocketManager(ILogger<WebSocketManager> logger, IServiceScopeFac
     {
         try
         {
-            await WebSocketHub.SendNotificationAsync(socket, new { status = abortStatus }, logger: _logger, method: Notification.ConnectionAborted);
+            await WebSocketHub.SendNotificationAsync(socket, new { status = abortStatus }, logger: _logger, method: WebSocketEventNames.Connection.Aborted);
             await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "The connection closed by the server", CancellationToken.None);
         }
         catch
@@ -100,7 +100,7 @@ public class WebSocketManager(ILogger<WebSocketManager> logger, IServiceScopeFac
                 if (socketInfo.WS?.State == WebSocketState.Open)
                 {
                     if (notifyClient)
-                        await WebSocketHub.SendNotificationAsync(socketInfo.WS, new { description }, method: Notification.UserUnAuth, logger: _logger);
+                        await WebSocketHub.SendNotificationAsync(socketInfo.WS, new { description }, method: WebSocketEventNames.User.UnAuth, logger: _logger);
 
                     await socketInfo.WS.CloseOutputAsync(closeStatus, description, CancellationToken.None);
                 }

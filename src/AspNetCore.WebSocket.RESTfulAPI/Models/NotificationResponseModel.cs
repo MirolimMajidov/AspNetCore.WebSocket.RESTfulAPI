@@ -13,7 +13,7 @@ public class NotificationResponseModel : ResponseModel
     public Dictionary<string, object> Params { get; init; }
 
     /// <summary>
-    /// It will be get value when the data sending by Notification
+    /// It will be get value when the data sending by WebSocketEventNames
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public object Data { get; set; }

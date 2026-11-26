@@ -39,7 +39,7 @@ public class WebSocketHub(IWebSocketManager manager, ILogger<WebSocketHub> logge
     {
         await Manager.AddSocket(userInfo.Id, socket, userInfo);
 
-        await SendNotificationAsync(userInfo.Id, new { }, Notification.WSConnected);
+        await SendNotificationAsync(userInfo.Id, new { }, WebSocketEventNames.Connection.Connected);
     }
 
     /// <summary>

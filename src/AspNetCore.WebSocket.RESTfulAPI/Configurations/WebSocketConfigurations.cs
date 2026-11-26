@@ -15,14 +15,18 @@ public static class WebSocketConfigurations
 
     public static IServiceCollection AddWebSocketServices(this IServiceCollection services)
     {
+        var webSocketBaseType = typeof(WebSocketHub);
         services.AddSingleton<IWebSocketManager, WebSocketManager>();
         services.AddScoped<WebSocketHub>();
 
-        var allAssemblies = Assembly.GetEntryAssembly()!.GetReferencedAssemblies().Select(name => Assembly.Load(name)).ToList();
+        var allAssemblies = Assembly.GetEntryAssembly()!.GetReferencedAssemblies().Select(name => Assembly.Load(name))
+            .ToList();
         allAssemblies.Add(Assembly.GetEntryAssembly());
         foreach (var type in allAssemblies.SelectMany(a => a.ExportedTypes))
         {
-            if (type.BaseType == typeof(WebSocketHub))
+            if (!type.IsAbstract
+                && type != webSocketBaseType
+                && webSocketBaseType.IsAssignableFrom(type))
                 services.AddScoped(type);
         }
 
